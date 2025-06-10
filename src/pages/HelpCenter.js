@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Logo from '../assets/img/logo.png';
 
 function HelpCenter() {
   const [openFaq, setOpenFaq] = useState(null)
@@ -61,7 +62,13 @@ function HelpCenter() {
       <header className="bg-white shadow-sm">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-[#b4518a]">Karpture</h1>
+            <div className="flex items-center">
+                  <img 
+                    src={Logo} 
+                    alt="Karpture Logo" 
+                    className="h-6 w-auto md:h-8"
+                  />
+            </div>
             <a href="/" className="text-gray-600 hover:text-[#b4518a] transition-colors">
               ← Back to Home
             </a>
