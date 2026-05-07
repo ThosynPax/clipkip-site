@@ -52,7 +52,7 @@ export const Footer = () => {
             <h4 className="text-sm font-extrabold text-dark uppercase tracking-wider">Company</h4>
             <ul className="space-y-4">
               {FOOTER_CONTENT.company.map(item => (
-                <li key={item}><a href="#" className="text-xs font-medium text-dark/40 hover:text-brand transition-colors">{item}</a></li>
+                <li key={item}><a href="/" className="text-xs font-medium text-dark/40 hover:text-brand transition-colors">{item}</a></li>
               ))}
             </ul>
           </div>
@@ -61,7 +61,7 @@ export const Footer = () => {
             <h4 className="text-sm font-extrabold text-dark uppercase tracking-wider">Product</h4>
             <ul className="space-y-4">
               {FOOTER_CONTENT.product.map(item => (
-                <li key={item}><a href="#" className="text-xs font-medium text-dark/40 hover:text-brand transition-colors">{item}</a></li>
+                <li key={item}><a href="/" className="text-xs font-medium text-dark/40 hover:text-brand transition-colors">{item}</a></li>
               ))}
             </ul>
           </div>
@@ -70,7 +70,7 @@ export const Footer = () => {
             <h4 className="text-sm font-extrabold text-dark uppercase tracking-wider">Resources</h4>
             <ul className="space-y-4">
               {FOOTER_CONTENT.resources.map(item => (
-                <li key={item}><a href="#" className="text-xs font-medium text-dark/40 hover:text-brand transition-colors">{item}</a></li>
+                <li key={item}><a href="/" className="text-xs font-medium text-dark/40 hover:text-brand transition-colors">{item}</a></li>
               ))}
             </ul>
           </div>
@@ -79,7 +79,7 @@ export const Footer = () => {
             <h4 className="text-sm font-extrabold text-dark uppercase tracking-wider">Extras</h4>
             <ul className="space-y-4">
               {FOOTER_CONTENT.extras.map(item => (
-                <li key={item}><a href="#" className="text-xs font-medium text-dark/40 hover:text-brand transition-colors">{item}</a></li>
+                <li key={item}><a href="/" className="text-xs font-medium text-dark/40 hover:text-brand transition-colors">{item}</a></li>
               ))}
             </ul>
           </div>
