@@ -1,4 +1,3 @@
-import { NAV_LINKS } from './constants';
 import { motion } from 'motion/react';
 import { useState, useEffect } from 'react';
 

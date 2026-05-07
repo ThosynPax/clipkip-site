@@ -1,4 +1,3 @@
-import { motion } from 'motion/react';
 
 export const Section = ({ children, className = '', id, containerClassName = '' }) => {
   return (

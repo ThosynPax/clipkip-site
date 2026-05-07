@@ -1,7 +1,6 @@
-import { Globe, ArrowRight, Zap, Shield, Sparkles } from 'lucide-react';
+import { Globe, ArrowRight, Sparkles } from 'lucide-react';
 import { HERO_CONTENT } from './constants';
 import { Section, FadeIn } from './Section';
-import { motion } from 'motion/react';
 
 export const Hero = () => {
   return (
