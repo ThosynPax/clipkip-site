@@ -7,6 +7,10 @@ import { Privacy } from './Privacy';
 import { Pricing } from './Pricing';
 import { DownloadCTA, Footer } from './Footer';
 
+import ProblemSolution from './ProblemSolution';
+import { FAQ } from './FAQ';
+import { TestimonialsMarquee } from './TestimonialsMarquee';
+
 const LandingPage = () => {
   return (
     <div className="relative min-h-screen bg-white">
@@ -17,10 +21,13 @@ const LandingPage = () => {
       
       <main>
         <Hero />
+        <ProblemSolution />
         <VideoSection />
         <Features />
+        <TestimonialsMarquee />
         <Privacy />
         <Pricing />
+        <FAQ />
         <DownloadCTA />
       </main>
 

@@ -21,21 +21,14 @@ export const Navbar = () => {
         isScrolled ? 'bg-white/80 backdrop-blur-md shadow-sm py-4' : 'bg-transparent'
       }`}
     >
-      <div className="container mx-auto px-6 max-w-7xl flex items-center justify-between">
-        <a href="/" className="text-2xl font-extrabold tracking-tight text-dark">
-          Karpture
+      <div className="container mx-auto px-10 md:px-20 max-w-6xl flex items-center justify-between">
+        <a href="/" className="group">
+          <img src="/icons/icon128.png" className="w-10 h-10 group-hover:rotate-12 transition-transform" alt="Logo" />
         </a>
 
         <nav className="hidden md:flex items-center space-x-10">
-          {NAV_LINKS.map((link) => (
-            <a
-              key={link.label}
-              href={link.href}
-              className="text-xs font-bold uppercase tracking-widest text-dark/70 hover:text-brand transition-colors"
-            >
-              {link.label}
-            </a>
-          ))}
+          <a href="#pricing" className="text-xs font-bold uppercase tracking-widest text-dark/40 hover:text-brand transition-colors">Pricing</a>
+          <a href="#faq" className="text-xs font-bold uppercase tracking-widest text-dark/40 hover:text-brand transition-colors">FAQ</a>
         </nav>
 
         <div className="flex items-center space-x-6">

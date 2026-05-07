@@ -22,8 +22,8 @@ export const VideoSection = () => {
       </FadeIn>
 
       <FadeIn delay={0.2} direction="up">
-        <div className="relative mx-auto max-w-5xl group">
-          <div className="relative aspect-video rounded-[2.5rem] overflow-hidden shadow-2xl border-8 border-white group-hover:shadow-[0_40px_80px_rgba(0,0,0,0.15)] transition-all duration-700">
+        <div className="relative mx-auto max-w-5xl group -mx-6 md:mx-auto">
+          <div className="relative aspect-video rounded-none md:rounded-[2.5rem] overflow-hidden shadow-2xl border-0 md:border-8 border-white group-hover:shadow-[0_40px_80px_rgba(0,0,0,0.15)] transition-all duration-700">
             <AnimatePresence mode="wait">
               {!isPlaying ? (
                 <motion.div

@@ -4,9 +4,13 @@ import LandingPage from "./landing/LandingPage"
 import Login from "./pages/Login"
 import Signup from "./pages/Signup"
 import Dashboard from "./pages/Dashboard"
-import PrivacyPolicy from "./pages/PrivacyPolicy"
 import HelpCenter from "./pages/HelpCenter"
-import TermsOfService from "./pages/TermsOfService"
+
+// Legal Pages
+import PrivacyPolicy from "./landing/legal/Privacy"
+import TermsOfService from "./landing/legal/Terms"
+import RefundPolicy from "./landing/legal/Refund"
+import CookiePolicy from "./landing/legal/Cookies"
 
 function App() {
   return (
@@ -16,9 +20,13 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/help-center" element={<HelpCenter />} />
-        <Route path="/terms-of-service" element={<TermsOfService />} />
+        
+        {/* Legal Routes */}
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/tos" element={<TermsOfService />} />
+        <Route path="/refund" element={<RefundPolicy />} />
+        <Route path="/cookies" element={<CookiePolicy />} />
       </Routes>
     </Router>
   )

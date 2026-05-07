@@ -1,8 +1,6 @@
 export const NAV_LINKS = [
-  { label: 'Features', href: '#features' },
-  { label: "How it Works", href: '#how-it-works' },
-  { label: 'Privacy', href: '#privacy' },
   { label: 'Pricing', href: '#pricing' },
+  { label: 'FAQ', href: '#faq' },
 ];
 
 export const HERO_CONTENT = {
