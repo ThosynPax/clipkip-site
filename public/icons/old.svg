@@ -1,0 +1,19 @@
+<svg width="220" height="220" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad" x1="40" y1="40" x2="180" y2="180" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#b4518a"/>
+      <stop offset="1" stop-color="#8a3d69"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Main rounded tile -->
+  <rect x="30" y="30" width="160" height="160" rx="40" fill="url(#grad)"/>
+
+  <!-- Memory stack forms -->
+  <rect x="62" y="68" width="92" height="16" rx="8" fill="white" fill-opacity="0.96"/>
+  <rect x="62" y="102" width="72" height="16" rx="8" fill="white" fill-opacity="0.92"/>
+  <rect x="62" y="136" width="102" height="16" rx="8" fill="white" fill-opacity="0.88"/>
+
+  <!-- Capture notch -->
+  <circle cx="154" cy="110" r="10" fill="#b4518a" stroke="white" stroke-width="6"/>
+</svg>
