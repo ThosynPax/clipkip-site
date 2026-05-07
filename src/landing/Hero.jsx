@@ -69,18 +69,35 @@ export const Hero = () => {
              <div className="p-12 text-left relative h-full">
                 <div className="max-w-2xl space-y-6">
                   <h3 className="text-2xl font-bold text-dark/20">The old way of saving notes is dead...</h3>
-                  <p className="text-xl font-medium text-dark/15 leading-relaxed">
-                    Most tools require you to manually save, tag, and organize. But the best ideas come when you're just browsing. 
-                    <span className="relative inline-block mx-1">
-                       <span className="bg-brand/10 text-dark px-1 rounded-sm">Karpture captures everything automatically</span>
-                       
-                       <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-brand text-white px-4 py-2 rounded-xl shadow-xl flex items-center gap-2 whitespace-nowrap z-30">
-                          <img src="/icons/save-to-karpture.png" className="w-4 h-4" alt="" />
-                          <span className="text-[11px] font-bold">Save to Karpture</span>
-                       </div>
-                    </span>
-                    so you can focus on the work that matters.
-                  </p>
+              <p className="text-xl font-medium text-dark/15 leading-relaxed">
+                Most tools require you to manually save, tag, and organize. But the best ideas come when you're just browsing. 
+                <span className="relative inline-block mx-1">
+                  <span className="bg-brand/10 text-dark px-1 rounded-sm">Karpture captures everything automatically</span>
+                  
+                  <button 
+                    onClick={() => {
+                      const btn = document.getElementById('hero-save-btn');
+                      const text = document.getElementById('hero-save-text');
+                      if (btn && text) {
+                        btn.classList.add('bg-green-500', 'scale-105');
+                        btn.classList.remove('bg-brand');
+                        text.innerText = 'Saved to Karpture!';
+                        setTimeout(() => {
+                          btn.classList.remove('bg-green-500', 'scale-105');
+                          btn.classList.add('bg-brand');
+                          text.innerText = 'Save to Karpture';
+                        }, 2000);
+                      }
+                    }}
+                    id="hero-save-btn"
+                    className="absolute -top-12 left-1/2 -translate-x-1/2 bg-brand text-white px-4 py-2 rounded-xl shadow-xl flex items-center gap-2 whitespace-nowrap z-30 transition-all duration-300 hover:scale-110 active:scale-95"
+                  >
+                    <img src="/icons/icon16.png" className="w-4 h-4 invert brightness-0" alt="" />
+                    <span id="hero-save-text" className="text-[11px] font-bold">Save to Karpture</span>
+                  </button>
+                </span>
+                so you can focus on the work that matters.
+              </p>
                   <div className="space-y-3 opacity-10">
                     {[1, 2, 3].map(i => <div key={i} className="h-4 bg-gray-200 rounded-full w-full" />)}
                   </div>

@@ -62,7 +62,7 @@ const Dashboard = () => {
         <div className="pt-8 border-t border-dark/5">
           <div className="bg-brand-light p-4 rounded-2xl mb-6">
             <p className="text-[10px] font-bold text-brand uppercase tracking-widest mb-1">Free Plan</p>
-            <p className="text-xs font-medium text-dark/60">30 days memory history remaining.</p>
+            <p className="text-xs font-medium text-dark/60">Local storage is active.</p>
           </div>
           <button 
             onClick={handleLogout}
@@ -94,33 +94,30 @@ const Dashboard = () => {
             </p>
           </div>
           <div className="bg-white p-8 rounded-[2rem] border border-dark/5 shadow-sm">
-            <p className="text-[10px] font-bold text-dark/30 uppercase tracking-widest mb-2">Total Memories</p>
-            <p className="text-xl font-bold text-dark">1,284</p>
+            <p className="text-[10px] font-bold text-dark/30 uppercase tracking-widest mb-2">Storage Model</p>
+            <p className="text-xl font-bold text-dark italic">Local-Only</p>
           </div>
           <div className="bg-white p-8 rounded-[2rem] border border-dark/5 shadow-sm">
-            <p className="text-[10px] font-bold text-dark/30 uppercase tracking-widest mb-2">Storage Usage</p>
-            <p className="text-xl font-bold text-dark">12.4 MB</p>
+            <p className="text-[10px] font-bold text-dark/30 uppercase tracking-widest mb-2">Privacy Status</p>
+            <p className="text-xl font-bold text-dark">Maximum</p>
           </div>
         </div>
 
-        <div className="mt-12 bg-white rounded-[2.5rem] border border-dark/5 shadow-sm overflow-hidden">
-          <div className="p-8 border-b border-dark/5 flex items-center justify-between">
-            <h2 className="font-extrabold text-dark uppercase tracking-widest text-xs">Recent Captures</h2>
-            <button className="text-brand font-bold text-xs hover:underline">View All</button>
-          </div>
-          <div className="divide-y divide-dark/5">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="p-6 hover:bg-gray-50 transition-all flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-bold text-dark mb-1">Design system tokens for v2...</p>
-                  <p className="text-[10px] text-dark/30 font-medium">Copied from: figma.com • 2 hours ago</p>
+        <div className="mt-12 bg-white rounded-[2.5rem] border border-dark/5 shadow-sm overflow-hidden p-20 text-center">
+            <div className="max-w-md mx-auto space-y-6">
+                <div className="w-16 h-16 bg-brand/5 text-brand rounded-full flex items-center justify-center mx-auto mb-8">
+                    <svg width={32} height={32} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path></svg>
                 </div>
-                <button className="text-dark/20 hover:text-brand transition-colors">
-                  <svg width={16} height={16} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                </button>
-              </div>
-            ))}
-          </div>
+                <h2 className="text-2xl font-extrabold text-dark">Strict Privacy Mode</h2>
+                <p className="text-sm font-medium text-dark/40 leading-relaxed">
+                    For your security, Karpture does not store your captures in the cloud. Your research history lives exclusively on your device within the browser extension.
+                </p>
+                <div className="pt-4">
+                    <button className="bg-dark text-white px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-dark/90 transition-all">
+                        Manage in Extension
+                    </button>
+                </div>
+            </div>
         </div>
       </main>
     </div>
