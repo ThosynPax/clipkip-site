@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard | Karpture</title>
+    <style>
+        body { font-family: sans-serif; background: #fdfafb; padding: 40px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        h1 { color: #b4518b; }
+        .status { padding: 20px; background: #f9f9f9; border-radius: 8px; margin-top: 20px; border: 1px solid #eee; }
+        .plan-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+        .plan-free { background: #eee; color: #666; }
+        .plan-pro { background: #b4518b; color: white; }
+        .actions { margin-top: 24px; display: flex; gap: 12px; flex-wrap: wrap; }
+        .btn { display: inline-block; padding: 10px 20px; background: #b4518b; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; cursor: pointer; border: none; font-size: 14px; }
+        .btn-outline { background: transparent; border: 2px solid #b4518b; color: #b4518b; }
+        .btn:hover { opacity: 0.85; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Karpture Dashboard</h1>
+        <p>Manage your account and extension memory.</p>
+        
+        <div class="status" id="statusPanel">
+            <strong>Plan:</strong> <span id="planLabel">Loading...</span><br>
+            <strong>Status:</strong> <span id="statusLabel">—</span><br>
+            <strong>Email:</strong> <span id="emailLabel">—</span>
+        </div>
+
+        <div class="actions">
+            <a href="/connect-extension" class="btn">Connect Browser Extension</a>
+            <a href="/upgrade" class="btn btn-outline" id="upgradeLink">Upgrade to Pro →</a>
+            <!-- Shown only for pro users -->
+            <button class="btn" id="manageSubBtn" style="display:none; background:#555;" onclick="manageSubscription()">
+                Manage Subscription
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // In production, fetch real user session from Supabase auth
+        const mockUser = { email: "user@example.com", plan: "free", status: "active" };
+
+        function loadDashboard() {
+            document.getElementById("emailLabel").textContent = mockUser.email;
+            const planEl = document.getElementById("planLabel");
+            const statusEl = document.getElementById("statusLabel");
+
+            planEl.innerHTML = mockUser.plan === "pro"
+                ? '<span class="plan-badge plan-pro">Pro</span>'
+                : '<span class="plan-badge plan-free">Free</span>';
+
+            statusEl.textContent = mockUser.status;
+
+            if (mockUser.plan === "pro") {
+                document.getElementById("upgradeLink").style.display = "none";
+                document.getElementById("manageSubBtn").style.display = "inline-block";
+            }
+        }
+
+        function manageSubscription() {
+            // Opens the LemonSqueezy billing portal
+            // Replace with real portal URL from LemonSqueezy
+            window.open("https://app.lemonsqueezy.com/billing", "_blank");
+        }
+
+        loadDashboard();
+    </script>
+</body>
+</html>

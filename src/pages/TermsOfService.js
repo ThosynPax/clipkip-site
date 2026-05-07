@@ -135,12 +135,7 @@ function TermsOfService() {
             Extension built by{" "}
             <a href="https://thosynpax.com" className="text-white hover:text-[#b4518a] transition-colors">
               Thosyn Pax
-            </a>{" "}
-            - Landing page supported by{" "}
-            <a href="https://v0.dev" className="text-white hover:text-[#b4518a] transition-colors">
-              v0.dev
-            </a>{" "}
-            and modified by me
+            </a>
           </p>
         </div>
       </footer>
