@@ -8,6 +8,7 @@ const Dashboard = () => {
   const [connecting, setConnecting] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const navigate = useNavigate();
+  const [plan, setPlan] = useState('free');
 
   useEffect(() => {
     const getSession = async () => {
@@ -16,7 +17,26 @@ const Dashboard = () => {
         navigate('/login');
       } else {
         setUser(session.user);
-        // Check if extension is already connected (we can store this in local storage or just try to connect)
+        
+        // Provision / Check Profile
+        const { data: sub, error: subError } = await supabase
+            .from('subscriptions')
+            .select('*')
+            .eq('user_id', session.user.id)
+            .single();
+
+        if (subError && subError.code === 'PGRST116') {
+            // Profile doesn't exist, create it (Free Plan)
+            await supabase.from('subscriptions').insert([{
+                user_id: session.user.id,
+                plan: 'free',
+                status: 'active'
+            }]);
+            setPlan('free');
+        } else if (sub) {
+            setPlan(sub.plan);
+        }
+
         const connected = localStorage.getItem('karpture_extension_connected') === 'true';
         setIsConnected(connected);
       }
@@ -92,8 +112,10 @@ const Dashboard = () => {
 
         <div className="pt-8 border-t border-dark/5">
           <div className="bg-brand-light p-4 rounded-2xl mb-6">
-            <p className="text-[10px] font-bold text-brand uppercase tracking-widest mb-1">Free Plan</p>
-            <p className="text-xs font-medium text-dark/60">Local storage is active.</p>
+            <p className="text-[10px] font-bold text-brand uppercase tracking-widest mb-1">{plan} Plan</p>
+            <p className="text-xs font-medium text-dark/60">
+                {plan === 'pro' ? 'Unlimited history active.' : 'Local storage is active.'}
+            </p>
           </div>
           <button 
             onClick={handleLogout}
