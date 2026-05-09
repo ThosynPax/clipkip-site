@@ -4,6 +4,7 @@ import LandingPage from "./landing/LandingPage"
 import Login from "./pages/Login"
 import Signup from "./pages/Signup"
 import Dashboard from "./pages/Dashboard"
+import Upgrade from "./pages/Upgrade"
 import HelpCenter from "./pages/HelpCenter"
 
 // Legal Pages
@@ -20,6 +21,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/upgrade" element={<Upgrade />} />
         <Route path="/help-center" element={<HelpCenter />} />
         
         {/* Legal Routes */}

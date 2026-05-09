@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 const Dashboard = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [connecting, setConnecting] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -14,6 +16,9 @@ const Dashboard = () => {
         navigate('/login');
       } else {
         setUser(session.user);
+        // Check if extension is already connected (we can store this in local storage or just try to connect)
+        const connected = localStorage.getItem('karpture_extension_connected') === 'true';
+        setIsConnected(connected);
       }
       setLoading(false);
     };
@@ -33,7 +38,33 @@ const Dashboard = () => {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    localStorage.removeItem('karpture_extension_connected');
     navigate('/login');
+  };
+
+  const handleConnectExtension = async () => {
+    setConnecting(true);
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (session) {
+        // Send message to extension via window.postMessage
+        // The content script will pick this up
+        window.postMessage({
+            type: "KARPTURE_CONNECT",
+            token: session.access_token,
+            user: {
+                id: session.user.id,
+                email: session.user.email
+            }
+        }, "*");
+
+        // Listen for success message from extension (optional but good)
+        setTimeout(() => {
+            setConnecting(false);
+            setIsConnected(true);
+            localStorage.setItem('karpture_extension_connected', 'true');
+        }, 1500);
+    }
   };
 
   if (loading) {
@@ -80,17 +111,26 @@ const Dashboard = () => {
             <h1 className="text-3xl font-extrabold text-dark">Welcome, {user?.email?.split('@')[0]}</h1>
             <p className="text-sm font-medium text-dark/40">Manage your second brain and extension settings.</p>
           </div>
-          <a href="/upgrade" className="bg-brand text-white px-8 py-3 rounded-full text-xs font-bold uppercase tracking-widest shadow-lg shadow-brand/20 hover:scale-105 transition-all">
-            Upgrade to Pro
-          </a>
+          <div className="flex items-center gap-4">
+             <button 
+                onClick={handleConnectExtension}
+                disabled={connecting || isConnected}
+                className={`px-8 py-3 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${isConnected ? 'bg-green-50 text-green-600 border border-green-100' : 'bg-white border border-dark/5 text-dark hover:bg-gray-50'}`}
+             >
+                {connecting ? 'Connecting...' : isConnected ? 'Extension Connected' : 'Connect Extension'}
+             </button>
+             <a href="/upgrade" className="bg-brand text-white px-8 py-3 rounded-full text-xs font-bold uppercase tracking-widest shadow-lg shadow-brand/20 hover:scale-105 transition-all">
+                Upgrade to Pro
+             </a>
+          </div>
         </header>
 
         <div className="grid md:grid-cols-3 gap-8">
           <div className="bg-white p-8 rounded-[2rem] border border-dark/5 shadow-sm">
             <p className="text-[10px] font-bold text-dark/30 uppercase tracking-widest mb-2">Extension Status</p>
-            <p className="text-xl font-bold text-green-500 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              Connected
+            <p className={`text-xl font-bold flex items-center gap-2 ${isConnected ? 'text-green-500' : 'text-dark/20'}`}>
+              <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500 animate-pulse' : 'bg-dark/10'}`} />
+              {isConnected ? 'Connected' : 'Not Connected'}
             </p>
           </div>
           <div className="bg-white p-8 rounded-[2rem] border border-dark/5 shadow-sm">
@@ -113,8 +153,11 @@ const Dashboard = () => {
                     For your security, Karpture does not store your captures in the cloud. Your research history lives exclusively on your device within the browser extension.
                 </p>
                 <div className="pt-4">
-                    <button className="bg-dark text-white px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-dark/90 transition-all">
-                        Manage in Extension
+                    <button 
+                        onClick={handleConnectExtension}
+                        className="bg-dark text-white px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-dark/90 transition-all"
+                    >
+                        {isConnected ? 'View Extension' : 'Initialize Connection'}
                     </button>
                 </div>
             </div>
