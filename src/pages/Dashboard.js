@@ -7,8 +7,38 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [connecting, setConnecting] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
+  const [extensionStats, setExtensionStats] = useState({ itemCount: 0, activeSession: false });
   const navigate = useNavigate();
   const [plan, setPlan] = useState('free');
+
+  useEffect(() => {
+    const handleExtensionMessages = (event) => {
+      if (event.data && event.data.type === "KARPTURE_STATUS_RESPONSE") {
+        setIsConnected(event.data.connected);
+        setExtensionStats({
+          itemCount: event.data.itemCount,
+          activeSession: event.data.activeSession
+        });
+        if (event.data.connected) {
+          localStorage.setItem('karpture_extension_connected', 'true');
+        } else {
+          localStorage.removeItem('karpture_extension_connected');
+        }
+      }
+    };
+
+    window.addEventListener("message", handleExtensionMessages);
+
+    // Initial check query
+    const checkTimer = setTimeout(() => {
+      window.postMessage({ type: "KARPTURE_GET_STATUS" }, "*");
+    }, 600);
+
+    return () => {
+      window.removeEventListener("message", handleExtensionMessages);
+      clearTimeout(checkTimer);
+    };
+  }, []);
 
   useEffect(() => {
     const getSession = async () => {
@@ -39,6 +69,16 @@ const Dashboard = () => {
 
         const connected = localStorage.getItem('karpture_extension_connected') === 'true';
         setIsConnected(connected);
+
+        // Auto-push connection event to the extension if session is active
+        window.postMessage({
+            type: "KARPTURE_CONNECT",
+            token: session.access_token,
+            user: {
+                id: session.user.id,
+                email: session.user.email
+            }
+        }, "*");
       }
       setLoading(false);
     };
@@ -68,7 +108,6 @@ const Dashboard = () => {
     
     if (session) {
         // Send message to extension via window.postMessage
-        // The content script will pick this up
         window.postMessage({
             type: "KARPTURE_CONNECT",
             token: session.access_token,
@@ -78,13 +117,17 @@ const Dashboard = () => {
             }
         }, "*");
 
-        // Listen for success message from extension (optional but good)
+        // Re-query extension status immediately after connecting
         setTimeout(() => {
+            window.postMessage({ type: "KARPTURE_GET_STATUS" }, "*");
             setConnecting(false);
-            setIsConnected(true);
-            localStorage.setItem('karpture_extension_connected', 'true');
         }, 1500);
     }
+  };
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    // Visual feedback handled by extension content script tooltip
   };
 
   if (loading) {
@@ -136,17 +179,18 @@ const Dashboard = () => {
           <div className="flex items-center gap-4">
              <button 
                 onClick={handleConnectExtension}
-                disabled={connecting || isConnected}
+                disabled={connecting}
                 className={`px-8 py-3 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${isConnected ? 'bg-green-50 text-green-600 border border-green-100' : 'bg-white border border-dark/5 text-dark hover:bg-gray-50'}`}
              >
-                {connecting ? 'Connecting...' : isConnected ? 'Extension Connected' : 'Connect Extension'}
+                {connecting ? 'Connecting...' : isConnected ? '✓ Sync Connected' : 'Connect Extension'}
              </button>
              <a href="/upgrade" className="bg-brand text-white px-8 py-3 rounded-full text-xs font-bold uppercase tracking-widest shadow-lg shadow-brand/20 hover:scale-105 transition-all">
                 Upgrade to Pro
-             </a>
+              </a>
           </div>
         </header>
 
+        {/* Dashboard Metrics */}
         <div className="grid md:grid-cols-3 gap-8">
           <div className="bg-white p-8 rounded-[2rem] border border-dark/5 shadow-sm">
             <p className="text-[10px] font-bold text-dark/30 uppercase tracking-widest mb-2">Extension Status</p>
@@ -156,33 +200,115 @@ const Dashboard = () => {
             </p>
           </div>
           <div className="bg-white p-8 rounded-[2rem] border border-dark/5 shadow-sm">
-            <p className="text-[10px] font-bold text-dark/30 uppercase tracking-widest mb-2">Storage Model</p>
-            <p className="text-xl font-bold text-dark italic">Local-Only</p>
+            <p className="text-[10px] font-bold text-dark/30 uppercase tracking-widest mb-2">Captured Memories</p>
+            <p className="text-xl font-bold text-dark">{extensionStats.itemCount} clips</p>
           </div>
           <div className="bg-white p-8 rounded-[2rem] border border-dark/5 shadow-sm">
-            <p className="text-[10px] font-bold text-dark/30 uppercase tracking-widest mb-2">Privacy Status</p>
-            <p className="text-xl font-bold text-dark">Maximum</p>
+            <p className="text-[10px] font-bold text-dark/30 uppercase tracking-widest mb-2">Privacy & Security</p>
+            <p className="text-xl font-bold text-dark flex items-center gap-2">
+              <svg width="18" height="18" fill="none" stroke="currentColor" className="text-brand" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+              Maximum
+            </p>
           </div>
         </div>
 
-        <div className="mt-12 bg-white rounded-[2.5rem] border border-dark/5 shadow-sm overflow-hidden p-20 text-center">
-            <div className="max-w-md mx-auto space-y-6">
-                <div className="w-16 h-16 bg-brand/5 text-brand rounded-full flex items-center justify-center mx-auto mb-8">
-                    <svg width={32} height={32} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path></svg>
-                </div>
-                <h2 className="text-2xl font-extrabold text-dark">Strict Privacy Mode</h2>
-                <p className="text-sm font-medium text-dark/40 leading-relaxed">
-                    For your security, Karpture does not store your captures in the cloud. Your research history lives exclusively on your device within the browser extension.
-                </p>
-                <div className="pt-4">
-                    <button 
-                        onClick={handleConnectExtension}
-                        className="bg-dark text-white px-8 py-3 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-dark/90 transition-all"
-                    >
-                        {isConnected ? 'View Extension' : 'Initialize Connection'}
-                    </button>
-                </div>
+        {/* Dynamic Interactive Section */}
+        <div className="grid md:grid-cols-2 gap-8 mt-12">
+          
+          {/* Column 1: Interactive Playroom */}
+          <div className="bg-white p-10 rounded-[2.5rem] border border-dark/5 shadow-sm space-y-6">
+            <div>
+              <span className="bg-brand/10 text-brand px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">Playground</span>
+              <h2 className="text-2xl font-extrabold text-dark mt-3">Interactive Capture Lab</h2>
+              <p className="text-xs font-medium text-dark/40 mt-1">Highlight and copy any segment below to test the Karpture popup in real-time!</p>
             </div>
+
+            <div className="space-y-4">
+              <div className="p-5 bg-brand-light rounded-2xl relative group border border-brand/5">
+                <p className="text-sm font-medium text-dark leading-relaxed pr-10">
+                  "Building a startup is 10% original idea and 90% scaling, learning rapidly, and documenting every breakthrough along the journey."
+                </p>
+                <button 
+                  onClick={() => copyToClipboard("Building a startup is 10% original idea and 90% scaling, learning rapidly, and documenting every breakthrough along the journey.")}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white p-2.5 rounded-xl border border-dark/5 text-dark/40 hover:text-brand hover:scale-105 active:scale-95 transition-all shadow-sm"
+                  title="One-click Copy"
+                >
+                  <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
+                </button>
+              </div>
+
+              <div className="p-5 bg-brand-light rounded-2xl relative group border border-brand/5">
+                <p className="text-sm font-medium text-dark leading-relaxed pr-10">
+                  "The future of productivity is local-first, privacy-respecting AI search tools that live alongside your current web browsing workflows."
+                </p>
+                <button 
+                  onClick={() => copyToClipboard("The future of productivity is local-first, privacy-respecting AI search tools that live alongside your current web browsing workflows.")}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white p-2.5 rounded-xl border border-dark/5 text-dark/40 hover:text-brand hover:scale-105 active:scale-95 transition-all shadow-sm"
+                  title="One-click Copy"
+                >
+                  <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
+                </button>
+              </div>
+
+              <div className="p-5 bg-brand-light rounded-2xl relative group border border-brand/5">
+                <p className="text-sm font-medium text-dark leading-relaxed pr-10">
+                  "Sensitive credential found: password_hash = sk-proj-aB89cDEfg1234. (Security check: blurs auto-detected secure hashes for safety)."
+                </p>
+                <button 
+                  onClick={() => copyToClipboard("Sensitive credential found: password_hash = sk-proj-aB89cDEfg1234.")}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white p-2.5 rounded-xl border border-dark/5 text-dark/40 hover:text-brand hover:scale-105 active:scale-95 transition-all shadow-sm"
+                  title="One-click Copy"
+                >
+                  <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Column 2: Memory Health & Stats */}
+          <div className="bg-white p-10 rounded-[2.5rem] border border-dark/5 shadow-sm flex flex-col justify-between space-y-6">
+            <div>
+              <span className="bg-green-50 text-green-600 border border-green-100 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">Second Brain Stats</span>
+              <h2 className="text-2xl font-extrabold text-dark mt-3">Active Brain Index</h2>
+              <p className="text-xs font-medium text-dark/40 mt-1">High-fidelity metrics calculated securely from your extension's local storage.</p>
+            </div>
+
+            <div className="space-y-6 my-auto">
+              <div className="space-y-2">
+                <div className="flex justify-between items-center text-xs font-bold text-dark">
+                  <span className="uppercase tracking-widest text-dark/40">Free Storage Limit</span>
+                  <span>{extensionStats.itemCount} / 100 Memories</span>
+                </div>
+                <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-brand transition-all duration-500 rounded-full" 
+                    style={{ width: `${Math.min(100, (extensionStats.itemCount / 100) * 100)}%` }}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-gray-50 rounded-2xl border border-dark/5">
+                  <p className="text-[10px] font-bold text-dark/30 uppercase tracking-widest mb-1">Active Recording</p>
+                  <p className="text-sm font-bold text-dark flex items-center gap-1.5">
+                    <span className={`w-2.5 h-2.5 rounded-full ${extensionStats.activeSession ? 'bg-red-500 animate-pulse' : 'bg-dark/10'}`} />
+                    {extensionStats.activeSession ? '🔴 In Session' : 'Idle'}
+                  </p>
+                </div>
+                <div className="p-4 bg-gray-50 rounded-2xl border border-dark/5">
+                  <p className="text-[10px] font-bold text-dark/30 uppercase tracking-widest mb-1">Local Index Size</p>
+                  <p className="text-sm font-bold text-dark italic">~{(extensionStats.itemCount * 0.15).toFixed(2)} KB</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-dark/5">
+              <p className="text-[11px] font-medium text-dark/50 leading-relaxed bg-brand-light p-4 rounded-xl border border-brand/5">
+                💡 <strong>Privacy First Model</strong>: Your memories never leave your browser. They are held on your device within your secure local sandboxed database and synced seamlessly with this browser page.
+              </p>
+            </div>
+
+          </div>
         </div>
       </main>
     </div>
