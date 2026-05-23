@@ -13,6 +13,8 @@ import TermsOfService from "./landing/legal/Terms"
 import RefundPolicy from "./landing/legal/Refund"
 import CookiePolicy from "./landing/legal/Cookies"
 
+import ProtectedRoute from "./components/ProtectedRoute"
+
 function App() {
   return (
     <Router>
@@ -20,8 +22,25 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/upgrade" element={<Upgrade />} />
+        
+        {/* Protected Routes */}
+        <Route 
+          path="/dashboard" 
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/upgrade" 
+          element={
+            <ProtectedRoute>
+              <Upgrade />
+            </ProtectedRoute>
+          } 
+        />
+        
         <Route path="/help-center" element={<HelpCenter />} />
         
         {/* Legal Routes */}

@@ -277,12 +277,12 @@ const Dashboard = () => {
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-xs font-bold text-dark">
                   <span className="uppercase tracking-widest text-dark/40">Free Storage Limit</span>
-                  <span>{extensionStats.itemCount} / 100 Memories</span>
+                  <span>{extensionStats.itemCount} / 1000 Memories</span>
                 </div>
                 <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
                   <div 
                     className="h-full bg-brand transition-all duration-500 rounded-full" 
-                    style={{ width: `${Math.min(100, (extensionStats.itemCount / 100) * 100)}%` }}
+                    style={{ width: `${Math.min(100, (extensionStats.itemCount / 1000) * 100)}%` }}
                   />
                 </div>
               </div>

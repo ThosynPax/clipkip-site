@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://api.trykarpture.com/api/:path*"
+    },
+    {
+      "source": "/polar-webhook",
+      "destination": "https://api.trykarpture.com/polar-webhook"
+    }
+  ]
+}
