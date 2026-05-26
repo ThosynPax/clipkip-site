@@ -1,12 +1,12 @@
 {
   "rewrites": [
     {
-      "source": "/api/:path*",
-      "destination": "https://api.trykarpture.com/api/:path*"
+      "source": "/api/(.*)",
+      "destination": "/api"
     },
     {
       "source": "/polar-webhook",
-      "destination": "https://api.trykarpture.com/polar-webhook"
+      "destination": "/api"
     }
   ]
 }
