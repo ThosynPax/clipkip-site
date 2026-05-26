@@ -6,6 +6,7 @@ import Signup from "./pages/Signup"
 import Dashboard from "./pages/Dashboard"
 import Upgrade from "./pages/Upgrade"
 import HelpCenter from "./pages/HelpCenter"
+import Feedback from "./pages/Feedback"
 
 // Legal Pages
 import PrivacyPolicy from "./landing/legal/Privacy"
@@ -44,6 +45,7 @@ function App() {
         />
         
         <Route path="/help-center" element={<HelpCenter />} />
+        <Route path="/feedback" element={<Feedback />} />
         
         {/* Legal Routes */}
         <Route path="/privacy" element={<PrivacyPolicy />} />
