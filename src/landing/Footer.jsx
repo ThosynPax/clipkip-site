@@ -54,6 +54,30 @@ export const Footer = () => {
               <p className="text-sm font-medium text-dark/60 leading-relaxed">
                 Karpture is designed, built, and maintained by <span className="text-dark font-bold">The Product Lab by Thosyn Pax</span>.
               </p>
+              
+              {/* Overlapping Contributor Facepile */}
+              <div className="pt-2">
+                <a 
+                  href="https://www.producthunt.com/products/clipkip/makers" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="flex items-center gap-3 group/facepile inline-flex hover:opacity-90 transition-opacity"
+                >
+                  <div className="flex -space-x-2 overflow-hidden">
+                    <div className="inline-flex items-center justify-center w-7 h-7 rounded-full border-2 border-white bg-blue-500 text-[10px] font-black text-white shadow-sm select-none">E</div>
+                    <div className="inline-flex items-center justify-center w-7 h-7 rounded-full border-2 border-white bg-teal-500 text-[10px] font-black text-white shadow-sm select-none">G</div>
+                    <div className="inline-flex items-center justify-center w-7 h-7 rounded-full border-2 border-white bg-orange-500 text-[10px] font-black text-white shadow-sm select-none">V</div>
+                    <div className="inline-flex items-center justify-center w-7 h-7 rounded-full border-2 border-white bg-red-500 text-[10px] font-black text-white shadow-sm select-none">H</div>
+                    <div className="inline-flex items-center justify-center w-7 h-7 rounded-full border-2 border-white bg-pink-500 text-[10px] font-black text-white shadow-sm select-none">B</div>
+                    <div className="inline-flex items-center justify-center w-7 h-7 rounded-full border-2 border-white bg-indigo-500 text-[10px] font-black text-white shadow-sm select-none">F</div>
+                    <div className="inline-flex items-center justify-center w-7 h-7 rounded-full border-2 border-white bg-green-500 text-[10px] font-black text-white shadow-sm select-none">K</div>
+                    <div className="inline-flex items-center justify-center w-7 h-7 rounded-full border-2 border-white bg-slate-500 text-[9px] font-black text-white shadow-sm select-none">+3</div>
+                  </div>
+                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-dark/40 group-hover/facepile:text-brand transition-colors">
+                    Karpture Contributors
+                  </span>
+                </a>
+              </div>
             </div>
           </div>
 
@@ -97,56 +121,8 @@ export const Footer = () => {
           </div>
         </div>
 
-        {/* QA Contributors & Co-Creators Section */}
-        <div className="pt-12 mt-12 border-t border-dark/5 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
-          <div className="space-y-2 max-w-2xl">
-            <h4 className="text-xs font-bold uppercase tracking-widest text-dark flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-brand animate-pulse" />
-              QA Contributors & Co-Creators
-            </h4>
-            <p className="text-xs font-medium text-dark/50 leading-relaxed">
-              Karpture was thoroughly tested, shaped, and co-created by a class of brilliant QA engineering students. They suggested core Version 2 features, performed rigorous limits testing, and led the strategic rebrand from ClipKip to Karpture.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-4">
-            <a 
-              href="https://www.producthunt.com/products/clipkip?utm_source=badge-follow&utm_medium=badge&utm_source=badge-clipkip" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="inline-block hover:scale-105 transition-transform active:scale-95"
-            >
-              <img 
-                src="https://api.producthunt.com/widgets/embed-image/v1/follow.svg?product_id=890462&theme=light" 
-                alt="Karpture - Product Hunt" 
-                style={{ width: "150px", height: "32px" }}
-                width="150"
-                height="32"
-              />
-            </a>
-            {/* Contributor profiles slot */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <a 
-                href="https://www.producthunt.com/@thosyn_pax" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-[10px] font-bold uppercase tracking-widest bg-brand/5 border border-brand/10 text-brand px-3 py-1.5 rounded-full hover:bg-brand hover:text-white transition-all active:scale-95"
-              >
-                Lead Architect
-              </a>
-              <a 
-                href="https://www.producthunt.com" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-[10px] font-bold uppercase tracking-widest bg-dark/5 border border-dark/10 text-dark/60 px-3 py-1.5 rounded-full hover:bg-dark hover:text-white transition-all active:scale-95"
-              >
-                QA Team Members
-              </a>
-            </div>
-          </div>
-        </div>
-
         {/* Bottom Bar - Always at the end */}
-        <div className="pt-12 mt-12 border-t border-dark/5 flex flex-col md:flex-row justify-between items-center gap-6">
+        <div className="pt-12 border-t border-dark/5 flex flex-col md:flex-row justify-between items-center gap-6">
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-dark/20">
             © {currentYear} Karpture. All rights reserved.
           </p>
