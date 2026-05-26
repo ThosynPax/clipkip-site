@@ -6,8 +6,22 @@ export const Hero = () => {
   return (
     <Section className="relative pt-32 md:pt-32 pb-16 organic-shape-1">
       <div className="max-w-4xl mx-auto text-center space-y-10">
-        {/* Trust Badge */}
-        <FadeIn direction="down" className="flex justify-center">
+        {/* Trust Badge & Product Hunt Follow */}
+        <FadeIn direction="down" className="flex flex-col items-center gap-4 justify-center">
+          <a 
+            href="https://www.producthunt.com/products/clipkip?utm_source=badge-follow&utm_medium=badge&utm_source=badge-clipkip" 
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block hover:scale-105 active:scale-95 transition-transform"
+          >
+            <img 
+              src="https://api.producthunt.com/widgets/embed-image/v1/follow.svg?product_id=890462&theme=light" 
+              alt="Karpture - Product Hunt" 
+              style={{ width: "250px", height: "54px" }} 
+              width="250" 
+              height="54" 
+            />
+          </a>
           <div className="bg-brand/10 border border-brand/20 px-4 py-1.5 rounded-full flex items-center gap-2">
             <Sparkles size={14} className="text-brand" />
             <span className="text-[10px] font-bold text-brand uppercase tracking-widest">Karpture v2.0 is live</span>
@@ -47,18 +61,6 @@ export const Hero = () => {
               <span className="flex text-yellow-400">★★★★★</span>
               <span className="text-[10px] font-bold uppercase tracking-wider text-dark/40">5.0 on Web Store</span>
             </div>
-            <a 
-              href="https://www.producthunt.com/posts/karpture" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="inline-block hover:opacity-90 transition-opacity active:scale-95"
-            >
-              <img 
-                src="https://api.producthunt.com/summary/v1/projects/karpture/badges/featured?theme=light" 
-                alt="Karpture - Product Hunt" 
-                style={{ width: "190px", height: "40px" }}
-              />
-            </a>
           </div>
         </FadeIn>
 

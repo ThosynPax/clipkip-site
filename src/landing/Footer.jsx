@@ -110,15 +110,17 @@ export const Footer = () => {
           </div>
           <div className="flex flex-wrap items-center gap-4">
             <a 
-              href="https://www.producthunt.com/posts/karpture" 
+              href="https://www.producthunt.com/products/clipkip?utm_source=badge-follow&utm_medium=badge&utm_source=badge-clipkip" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="inline-block hover:opacity-90 transition-opacity active:scale-95"
+              className="inline-block hover:scale-105 transition-transform active:scale-95"
             >
               <img 
-                src="https://api.producthunt.com/summary/v1/projects/karpture/badges/featured?theme=light" 
+                src="https://api.producthunt.com/widgets/embed-image/v1/follow.svg?product_id=890462&theme=light" 
                 alt="Karpture - Product Hunt" 
                 style={{ width: "150px", height: "32px" }}
+                width="150"
+                height="32"
               />
             </a>
             {/* Contributor profiles slot */}
