@@ -11,8 +11,22 @@
 const express = require('express');
 const cors = require('cors');
 const { createClient } = require('@supabase/supabase-js');
+const Sentry = require("@sentry/node");
+const { nodeProfilingIntegration } = require("@sentry/profiling-node");
+const { Resend } = require('resend');
 
 const app = express();
+
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  integrations: [
+    nodeProfilingIntegration(),
+  ],
+  tracesSampleRate: 1.0,
+  profilesSampleRate: 1.0,
+});
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Supabase admin client (uses service key to bypass RLS)
 const supabase = createClient(
@@ -167,10 +181,62 @@ app.get('/api/subscription-status', async (req, res) => {
         res.json({ plan });
 
     } catch (err) {
+        Sentry.captureException(err);
         console.error('Subscription status error:', err);
         res.status(500).json({ error: 'Server error' });
     }
 });
+
+// ─────────────────────────────────────────────
+// POST /api/feedback
+// Receives feedback from the web app, stores it, and emails admin
+// ─────────────────────────────────────────────
+app.post('/api/feedback', async (req, res) => {
+    const { name, email, type, message, user_id } = req.body;
+
+    if (!name || !email || !type || !message) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    try {
+        // 1. Store in Supabase
+        const { error: dbError } = await supabase
+            .from('feedbacks')
+            .insert([{ name, email, type, message, user_id: user_id || null }]);
+
+        if (dbError) {
+            console.error('Supabase insert error (feedback):', dbError);
+            return res.status(500).json({ error: 'Failed to save feedback' });
+        }
+
+        // 2. Send email via Resend
+        if (process.env.RESEND_API_KEY) {
+            await resend.emails.send({
+                from: 'Karpture Feedback <noreply@trykarpture.com>',
+                to: ['me@thosynpax.com'],
+                subject: `New Feedback: ${type}`,
+                html: `
+                    <h2>New Karpture Feedback</h2>
+                    <p><strong>Name:</strong> ${name}</p>
+                    <p><strong>Email:</strong> ${email}</p>
+                    <p><strong>Type:</strong> ${type}</p>
+                    <p><strong>User ID:</strong> ${user_id || 'N/A'}</p>
+                    <hr/>
+                    <p><strong>Message:</strong></p>
+                    <p>${message.replace(/\n/g, '<br/>')}</p>
+                `
+            });
+        }
+
+        res.status(200).json({ status: 'success' });
+    } catch (err) {
+        Sentry.captureException(err);
+        console.error('Feedback error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+Sentry.setupExpressErrorHandler(app);
 
 // Export the Express app for Vercel Serverless
 module.exports = app;
