@@ -68,10 +68,7 @@ export const Footer = () => {
                     <div className="inline-flex items-center justify-center w-7 h-7 rounded-full border-2 border-white bg-teal-500 text-[10px] font-black text-white shadow-sm select-none">G</div>
                     <div className="inline-flex items-center justify-center w-7 h-7 rounded-full border-2 border-white bg-orange-500 text-[10px] font-black text-white shadow-sm select-none">V</div>
                     <div className="inline-flex items-center justify-center w-7 h-7 rounded-full border-2 border-white bg-red-500 text-[10px] font-black text-white shadow-sm select-none">H</div>
-                    <div className="inline-flex items-center justify-center w-7 h-7 rounded-full border-2 border-white bg-pink-500 text-[10px] font-black text-white shadow-sm select-none">B</div>
-                    <div className="inline-flex items-center justify-center w-7 h-7 rounded-full border-2 border-white bg-indigo-500 text-[10px] font-black text-white shadow-sm select-none">F</div>
-                    <div className="inline-flex items-center justify-center w-7 h-7 rounded-full border-2 border-white bg-green-500 text-[10px] font-black text-white shadow-sm select-none">K</div>
-                    <div className="inline-flex items-center justify-center w-7 h-7 rounded-full border-2 border-white bg-slate-500 text-[9px] font-black text-white shadow-sm select-none">+3</div>
+                    <div className="inline-flex items-center justify-center w-7 h-7 rounded-full border-2 border-white bg-slate-500 text-[9px] font-black text-white shadow-sm select-none">+6</div>
                   </div>
                   <span className="text-[10px] font-extrabold uppercase tracking-widest text-dark/40 group-hover/facepile:text-brand transition-colors">
                     Karpture Contributors
