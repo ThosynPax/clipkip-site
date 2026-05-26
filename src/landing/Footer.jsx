@@ -97,8 +97,54 @@ export const Footer = () => {
           </div>
         </div>
 
+        {/* QA Contributors & Co-Creators Section */}
+        <div className="pt-12 mt-12 border-t border-dark/5 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+          <div className="space-y-2 max-w-2xl">
+            <h4 className="text-xs font-bold uppercase tracking-widest text-dark flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-brand animate-pulse" />
+              QA Contributors & Co-Creators
+            </h4>
+            <p className="text-xs font-medium text-dark/50 leading-relaxed">
+              Karpture was thoroughly tested, shaped, and co-created by a class of brilliant QA engineering students. They suggested core Version 2 features, performed rigorous limits testing, and led the strategic rebrand from ClipKip to Karpture.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-4">
+            <a 
+              href="https://www.producthunt.com/posts/karpture" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-block hover:opacity-90 transition-opacity active:scale-95"
+            >
+              <img 
+                src="https://api.producthunt.com/summary/v1/projects/karpture/badges/featured?theme=light" 
+                alt="Karpture - Product Hunt" 
+                style={{ width: "150px", height: "32px" }}
+              />
+            </a>
+            {/* Contributor profiles slot */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <a 
+                href="https://www.producthunt.com/@thosyn_pax" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-[10px] font-bold uppercase tracking-widest bg-brand/5 border border-brand/10 text-brand px-3 py-1.5 rounded-full hover:bg-brand hover:text-white transition-all active:scale-95"
+              >
+                Lead Architect
+              </a>
+              <a 
+                href="https://www.producthunt.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-[10px] font-bold uppercase tracking-widest bg-dark/5 border border-dark/10 text-dark/60 px-3 py-1.5 rounded-full hover:bg-dark hover:text-white transition-all active:scale-95"
+              >
+                QA Team Members
+              </a>
+            </div>
+          </div>
+        </div>
+
         {/* Bottom Bar - Always at the end */}
-        <div className="pt-12 border-t border-dark/5 flex flex-col md:flex-row justify-between items-center gap-6">
+        <div className="pt-12 mt-12 border-t border-dark/5 flex flex-col md:flex-row justify-between items-center gap-6">
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-dark/20">
             © {currentYear} Karpture. All rights reserved.
           </p>

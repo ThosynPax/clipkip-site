@@ -42,11 +42,23 @@ export const Hero = () => {
             <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
           </a>
 
-          <div className="flex flex-wrap justify-center gap-8 pt-4">
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-6 pt-4">
             <div className="flex items-center gap-2 text-dark/30">
               <span className="flex text-yellow-400">★★★★★</span>
               <span className="text-[10px] font-bold uppercase tracking-wider text-dark/40">5.0 on Web Store</span>
             </div>
+            <a 
+              href="https://www.producthunt.com/posts/karpture" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-block hover:opacity-90 transition-opacity active:scale-95"
+            >
+              <img 
+                src="https://api.producthunt.com/summary/v1/projects/karpture/badges/featured?theme=light" 
+                alt="Karpture - Product Hunt" 
+                style={{ width: "190px", height: "40px" }}
+              />
+            </a>
           </div>
         </FadeIn>
 
