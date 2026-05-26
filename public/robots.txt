@@ -1,3 +1,18 @@
-# https://www.robotstxt.org/robotstxt.html
+# Robots.txt for Karpture
+# Designed for peak Google Search Console crawling efficiency
+
 User-agent: *
-Disallow:
+Allow: /
+Allow: /privacy
+Allow: /tos
+Allow: /refund
+Allow: /cookies
+Allow: /login
+Allow: /signup
+
+# Exclude private authentication-walled client routes
+Disallow: /dashboard
+Disallow: /upgrade
+
+# Declare sitemap location
+Sitemap: https://trykarpture.com/sitemap.xml
