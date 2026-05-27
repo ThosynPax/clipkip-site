@@ -10,6 +10,7 @@ const Dashboard = () => {
   const [extensionStats, setExtensionStats] = useState({ itemCount: 0, activeSession: false });
   const navigate = useNavigate();
   const [plan, setPlan] = useState('free');
+  const FREE_MEMORY_LIMIT = 5000;
 
   useEffect(() => {
     const handleExtensionMessages = (event) => {
@@ -273,34 +274,58 @@ const Dashboard = () => {
               <p className="text-xs font-medium text-dark/40 mt-1">High-fidelity metrics calculated securely from your extension's local storage.</p>
             </div>
 
-            <div className="space-y-6 my-auto">
-              <div className="space-y-2">
-                <div className="flex justify-between items-center text-xs font-bold text-dark">
-                  <span className="uppercase tracking-widest text-dark/40">Free Storage Limit</span>
-                  <span>{extensionStats.itemCount} / 1000 Memories</span>
+            {plan !== 'pro' && extensionStats.itemCount >= FREE_MEMORY_LIMIT ? (
+              /* Limit reached — locked state */
+              <div className="flex flex-col items-center justify-center flex-1 py-8 text-center space-y-4">
+                <div className="w-14 h-14 rounded-2xl bg-brand/10 flex items-center justify-center">
+                  <svg width="24" height="24" fill="none" stroke="currentColor" className="text-brand" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-dark">Memory limit reached</p>
+                  <p className="text-xs font-medium text-dark/40 mt-1">You've used all {FREE_MEMORY_LIMIT.toLocaleString()} free memories.<br/>Upgrade to Pro for unlimited history.</p>
                 </div>
                 <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-brand transition-all duration-500 rounded-full" 
-                    style={{ width: `${Math.min(100, (extensionStats.itemCount / 1000) * 100)}%` }}
-                  />
+                  <div className="h-full bg-brand rounded-full w-full" />
                 </div>
+                <p className="text-[10px] font-bold text-brand uppercase tracking-widest">{extensionStats.itemCount} / {FREE_MEMORY_LIMIT.toLocaleString()} Memories</p>
+                <a href="/upgrade" className="inline-block bg-brand text-white px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest shadow-lg shadow-brand/20 hover:scale-105 transition-all mt-2">
+                  Upgrade to Pro
+                </a>
               </div>
+            ) : (
+              /* Normal stats view */
+              <div className="space-y-6 my-auto">
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center text-xs font-bold text-dark">
+                    <span className="uppercase tracking-widest text-dark/40">Free Storage Limit</span>
+                    <span>{extensionStats.itemCount} / {plan === 'pro' ? '∞' : FREE_MEMORY_LIMIT.toLocaleString()} Memories</span>
+                  </div>
+                  <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-brand transition-all duration-500 rounded-full" 
+                      style={{ width: plan === 'pro' ? '100%' : `${Math.min(100, (extensionStats.itemCount / FREE_MEMORY_LIMIT) * 100)}%` }}
+                    />
+                  </div>
+                  {plan !== 'pro' && extensionStats.itemCount >= FREE_MEMORY_LIMIT * 0.9 && (
+                    <p className="text-[10px] font-bold text-amber-500 uppercase tracking-widest">⚠ Approaching limit — upgrade soon</p>
+                  )}
+                </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 bg-gray-50 rounded-2xl border border-dark/5">
-                  <p className="text-[10px] font-bold text-dark/30 uppercase tracking-widest mb-1">Active Recording</p>
-                  <p className="text-sm font-bold text-dark flex items-center gap-1.5">
-                    <span className={`w-2.5 h-2.5 rounded-full ${extensionStats.activeSession ? 'bg-red-500 animate-pulse' : 'bg-dark/10'}`} />
-                    {extensionStats.activeSession ? '🔴 In Session' : 'Idle'}
-                  </p>
-                </div>
-                <div className="p-4 bg-gray-50 rounded-2xl border border-dark/5">
-                  <p className="text-[10px] font-bold text-dark/30 uppercase tracking-widest mb-1">Local Index Size</p>
-                  <p className="text-sm font-bold text-dark italic">~{(extensionStats.itemCount * 0.15).toFixed(2)} KB</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-gray-50 rounded-2xl border border-dark/5">
+                    <p className="text-[10px] font-bold text-dark/30 uppercase tracking-widest mb-1">Active Recording</p>
+                    <p className="text-sm font-bold text-dark flex items-center gap-1.5">
+                      <span className={`w-2.5 h-2.5 rounded-full ${extensionStats.activeSession ? 'bg-red-500 animate-pulse' : 'bg-dark/10'}`} />
+                      {extensionStats.activeSession ? '🔴 In Session' : 'Idle'}
+                    </p>
+                  </div>
+                  <div className="p-4 bg-gray-50 rounded-2xl border border-dark/5">
+                    <p className="text-[10px] font-bold text-dark/30 uppercase tracking-widest mb-1">Local Index Size</p>
+                    <p className="text-sm font-bold text-dark italic">~{(extensionStats.itemCount * 0.15).toFixed(2)} KB</p>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             <div className="pt-4 border-t border-dark/5">
               <p className="text-[11px] font-medium text-dark/50 leading-relaxed bg-brand-light p-4 rounded-xl border border-brand/5">
