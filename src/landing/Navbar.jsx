@@ -26,8 +26,9 @@ export const Navbar = () => {
         </a>
 
         <nav className="hidden md:flex items-center space-x-10">
-          <a href="#pricing" className="text-xs font-bold uppercase tracking-widest text-dark/40 hover:text-brand transition-colors">Pricing</a>
-          <a href="#faq" className="text-xs font-bold uppercase tracking-widest text-dark/40 hover:text-brand transition-colors">FAQ</a>
+          <a href="/#pricing" className="text-xs font-bold uppercase tracking-widest text-dark/40 hover:text-brand transition-colors">Pricing</a>
+          <a href="/#faq" className="text-xs font-bold uppercase tracking-widest text-dark/40 hover:text-brand transition-colors">FAQ</a>
+          <a href="/feedback" className="text-xs font-bold uppercase tracking-widest text-dark/40 hover:text-brand transition-colors">Feedback</a>
         </nav>
 
         <div className="flex items-center space-x-6">
