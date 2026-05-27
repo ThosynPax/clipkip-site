@@ -43,8 +43,14 @@ const Feedback = () => {
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Failed to submit feedback');
+        const contentType = res.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const data = await res.json();
+          throw new Error(data.error || 'Failed to submit feedback');
+        } else {
+          const text = await res.text();
+          throw new Error('Server configuration error. Please ensure all backend API keys are set.');
+        }
       }
 
       setSuccess(true);
@@ -59,7 +65,7 @@ const Feedback = () => {
     return (
       <div className="relative min-h-screen bg-white flex flex-col">
         <Navbar />
-        <main className="flex-grow bg-brand-light flex items-center justify-center px-4 py-20 pt-40 md:pt-48">
+        <main className="flex-grow bg-brand-light flex items-center justify-center px-4 py-20 pt-56 md:pt-64">
           <div className="max-w-md w-full bg-white rounded-[2.5rem] shadow-2xl shadow-brand/10 p-8 md:p-12 border border-dark/5 text-center">
             <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 text-green-500">
               <svg width="40" height="40" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -89,7 +95,7 @@ const Feedback = () => {
   return (
     <div className="relative min-h-screen bg-white flex flex-col">
       <Navbar />
-      <main className="flex-grow bg-brand-light flex flex-col items-center justify-center py-20 pt-40 md:pt-48 px-4">
+      <main className="flex-grow bg-brand-light flex flex-col items-center justify-center py-20 pt-56 md:pt-64 px-4">
         
         {/* Page Header */}
         <div className="text-center mb-10 md:mb-16 max-w-2xl mx-auto px-4">

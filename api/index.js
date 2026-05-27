@@ -26,13 +26,13 @@ Sentry.init({
   profilesSampleRate: 1.0,
 });
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY || 're_placeholder_key_to_prevent_crash');
 
 // Supabase admin client (uses service key to bypass RLS)
-const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_KEY
-);
+const supabaseUrl = process.env.SUPABASE_URL || process.env.REACT_APP_SUPABASE_URL || 'https://placeholder.supabase.co';
+const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.REACT_APP_SUPABASE_ANON_KEY || 'placeholder_key_to_prevent_crash';
+
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 app.use(cors({
     origin: ['https://trykarpture.com', 'http://localhost:3000', 'http://localhost:5173'],
