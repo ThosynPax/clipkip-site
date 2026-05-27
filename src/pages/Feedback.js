@@ -48,7 +48,7 @@ const Feedback = () => {
           const data = await res.json();
           throw new Error(data.error || 'Failed to submit feedback');
         } else {
-          const text = await res.text();
+          await res.text();
           throw new Error('Server configuration error. Please ensure all backend API keys are set.');
         }
       }
