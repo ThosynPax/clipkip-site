@@ -14,11 +14,10 @@ export const HERO_CONTENT = {
 };
 
 export const VIDEO_CONTENT = {
-  subtitle: "WATCH IT IN ACTION",
+  subtitle: "The Browser Extension That Remembers Everything You Copy",
   title: "Capture, Search, Recall. Like a Pro.",
   description: "See how Karpture builds your personal history in the background while you work. No manual saving, no forgotten ideas.",
-  videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-  thumbnail: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=1200",
+  videoUrl: "https://www.youtube.com/embed/SlDR58warys?playsinline=1&modestbranding=1&rel=0",
 };
 
 export const FEATURES_CONTENT = {

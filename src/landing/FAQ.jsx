@@ -44,7 +44,7 @@ const FAQItem = ({ question, answer }) => {
 
 export const FAQ = () => {
   return (
-    <Section className="bg-white">
+    <Section className="bg-white" id="faq">
       <div className="grid lg:grid-cols-12 gap-16">
         <div className="lg:col-span-5">
           <FadeIn direction="right">
