@@ -1,0 +1,39 @@
+name: Keep Supabase Alive
+
+on:
+  schedule:
+    # Runs every day at 00:00 UTC to prevent Supabase database from pausing due to inactivity
+    - cron: '0 0 * * *'
+  workflow_dispatch: # Allows manual execution from the GitHub Actions UI
+
+jobs:
+  ping-supabase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase Database
+        run: |
+          if [ -z "${{ secrets.SUPABASE_URL }}" ] || [ -z "${{ secrets.SUPABASE_ANON_KEY }}" ]; then
+            echo "Error: SUPABASE_URL and SUPABASE_ANON_KEY secrets must be configured in GitHub repository settings."
+            exit 1
+          fi
+
+          echo "Sending query request to Supabase API..."
+          
+          # Send a GET request to the subscriptions table limiting to 1 result. 
+          # Even if RLS (Row Level Security) filters the rows out and returns an empty array,
+          # it still establishes a database connection and runs a query, keeping it active.
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X GET "${{ secrets.SUPABASE_URL }}/rest/v1/subscriptions?select=id&limit=1" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
+
+          echo "Supabase HTTP response status code: $RESPONSE"
+
+          # 200 (OK) or 204 (No Content) indicates success.
+          # 401 (Unauthorized) or 406 (Not Acceptable) still indicates the server is awake and processed the request.
+          if [ "$RESPONSE" -eq 200 ] || [ "$RESPONSE" -eq 204 ] || [ "$RESPONSE" -eq 401 ] || [ "$RESPONSE" -eq 406 ]; then
+            echo "Successfully pinged Supabase. Database is active and reachable."
+          else
+            echo "Failed to contact Supabase REST API (HTTP Status: $RESPONSE)."
+            exit 1
+          fi
