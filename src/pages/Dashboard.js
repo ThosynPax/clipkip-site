@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { supabase } from '../supabase';
 import { useNavigate } from 'react-router-dom';
+import LogoWhite from '../assets/img/logo-white.png';
 import { 
   Search, 
   ChevronDown, 
@@ -281,12 +282,9 @@ const Dashboard = () => {
 
         {/* Top Navbar */}
         <header className="flex items-center justify-between z-10 max-w-5xl mx-auto w-full">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-brand/20 border border-brand/40 flex items-center justify-center text-brand font-black text-sm">
-              K
-            </div>
-            <span className="font-extrabold text-lg tracking-tight">Karpture</span>
-          </div>
+          <a href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+            <img src={LogoWhite} alt="Karpture" className="h-8 w-auto" />
+          </a>
 
           <div className="flex items-center gap-4">
             <span className="text-xs text-white/50 hidden sm:inline">{user?.email}</span>
@@ -365,7 +363,22 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-[#111113] text-white p-6 md:p-12 font-sans selection:bg-brand/30 selection:text-white">
       <div className="max-w-4xl mx-auto space-y-10">
-        
+        {/* Brand Bar */}
+        <div className="flex items-center justify-between pb-6 border-b border-white/5">
+          <a href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+            <img src={LogoWhite} alt="Karpture" className="h-7 w-auto" />
+          </a>
+          <div className="flex items-center gap-4">
+            <span className="text-xs text-white/50 hidden sm:inline">{user?.email}</span>
+            <button 
+              onClick={handleLogout}
+              className="text-xs font-bold text-white/40 hover:text-white transition-colors flex items-center gap-1.5"
+            >
+              <LogOut size={14} /> Logout
+            </button>
+          </div>
+        </div>
+
         {/* Top Greeting Header */}
         <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
@@ -382,13 +395,6 @@ const Dashboard = () => {
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               Pro Active
             </span>
-            <button 
-              onClick={handleLogout}
-              className="p-2 text-white/40 hover:text-white hover:bg-white/5 rounded-xl transition-all"
-              title="Logout"
-            >
-              <LogOut size={18} />
-            </button>
           </div>
         </header>
 
