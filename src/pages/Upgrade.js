@@ -6,11 +6,12 @@ const Upgrade = () => {
     const navigate = useNavigate();
 
     const features = [
-        "Focus Mode & Ignore Sources",
-        "Export all memories",
-        "Advanced context recall",
+        "Cloud Sync & Web Dashboard",
+        "AI Topic Clustering & Smart Grouping",
         "Full search across all time",
         "Unlimited memory history",
+        "Focus Mode & Ignore Sources",
+        "Export all memories (HTML/JSON)",
         "Priority support"
     ];
 

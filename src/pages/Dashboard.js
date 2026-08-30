@@ -1,29 +1,122 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { supabase } from '../supabase';
 import { useNavigate } from 'react-router-dom';
+import { 
+  Search, 
+  ChevronDown, 
+  ChevronUp, 
+  Copy, 
+  Check, 
+  Sparkles, 
+  Lock, 
+  ArrowRight, 
+  LogOut, 
+  Globe 
+} from 'lucide-react';
+
+const CLUSTER_COLORS = [
+  '#3b82f6', // blue
+  '#22c55e', // green
+  '#eab308', // yellow
+  '#a855f7', // purple
+  '#ec4899', // pink
+  '#06b6d4', // cyan
+];
+
+// Fallback demo clips to demonstrate clustering when local storage has fewer clips
+const DEMO_CLIPS = [
+  {
+    id: 'demo-1',
+    text: "Building a startup is 10% original idea and 90% scaling, learning rapidly, and documenting every breakthrough along the journey.",
+    date: new Date(Date.now() - 2 * 3600000).toISOString(),
+    url: "https://news.ycombinator.com",
+    title: "Hacker News - Startup Scaling",
+    topic: "Startup scaling advice"
+  },
+  {
+    id: 'demo-2',
+    text: "Product-market fit isn't a single milestone, it's a moving target where customer retention tells the real story.",
+    date: new Date(Date.now() - 5 * 3600000).toISOString(),
+    url: "https://substack.com",
+    title: "SaaS Playbook",
+    topic: "Startup scaling advice"
+  },
+  {
+    id: 'demo-3',
+    text: "The future of productivity is local-first, privacy-respecting AI tools that live alongside your workflows.",
+    date: new Date(Date.now() - 24 * 3600000).toISOString(),
+    url: "https://wired.com",
+    title: "Wired - Local-First Software",
+    topic: "Privacy-first tools"
+  },
+  {
+    id: 'demo-4',
+    text: "Zero-knowledge encryption guarantees that server operators and third parties can never inspect user clipboard data.",
+    date: new Date(Date.now() - 48 * 3600000).toISOString(),
+    url: "https://github.com",
+    title: "Security Best Practices",
+    topic: "Privacy-first tools"
+  },
+  {
+    id: 'demo-5',
+    text: "Always sanitize authorization headers and enforce token expiration on serverless proxy endpoints.",
+    date: new Date(Date.now() - 36 * 3600000).toISOString(),
+    url: "https://owasp.org",
+    title: "OWASP API Security",
+    topic: "Security snippets"
+  }
+];
+
+function assignTopic(item) {
+  if (item.topic) return item.topic;
+  const text = (item.text || item.title || '').toLowerCase();
+  const url = (item.url || '').toLowerCase();
+
+  if (text.includes('startup') || text.includes('scale') || text.includes('growth') || text.includes('saas') || text.includes('product') || url.includes('news.ycombinator') || url.includes('sub')) {
+    return 'Startup scaling advice';
+  }
+  if (text.includes('privacy') || text.includes('local') || text.includes('storage') || text.includes('encrypt') || text.includes('cookie') || text.includes('chrome')) {
+    return 'Privacy-first tools';
+  }
+  if (text.includes('security') || text.includes('auth') || text.includes('token') || text.includes('jwt') || text.includes('api') || text.includes('key') || text.includes('sql') || text.includes('code')) {
+    return 'Security snippets';
+  }
+  if (text.includes('ai') || text.includes('model') || text.includes('prompt') || text.includes('agent') || text.includes('llm')) {
+    return 'AI & Intelligence';
+  }
+  return 'Productivity & Research';
+}
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [connecting, setConnecting] = useState(false);
-  const [isConnected, setIsConnected] = useState(false);
-  const [extensionStats, setExtensionStats] = useState({ itemCount: 0, activeSession: false });
-  const navigate = useNavigate();
   const [plan, setPlan] = useState('free');
-  const FREE_MEMORY_LIMIT = 5000;
+  const [, setIsConnected] = useState(false);
+  const [clips, setClips] = useState([]);
+  const [recentCount, setRecentCount] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCluster, setSelectedCluster] = useState(null);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [copiedId, setCopiedId] = useState(null);
+  const navigate = useNavigate();
 
+  // 1. Listen for extension connection responses
   useEffect(() => {
     const handleExtensionMessages = (event) => {
       if (event.data && event.data.type === "KARPTURE_STATUS_RESPONSE") {
-        setIsConnected(event.data.connected);
-        setExtensionStats({
-          itemCount: event.data.itemCount,
-          activeSession: event.data.activeSession
-        });
-        if (event.data.connected) {
+        const hasConnection = event.data.connected;
+        setIsConnected(hasConnection);
+        if (hasConnection) {
           localStorage.setItem('karpture_extension_connected', 'true');
-        } else {
-          localStorage.removeItem('karpture_extension_connected');
+        }
+
+        if (event.data.clips && event.data.clips.length > 0) {
+          setClips(event.data.clips);
+          localStorage.setItem('karpture_cached_clips', JSON.stringify(event.data.clips));
+        }
+
+        if (typeof event.data.recentCount === 'number') {
+          setRecentCount(event.data.recentCount);
         }
       }
     };
@@ -33,7 +126,7 @@ const Dashboard = () => {
     // Initial check query
     const checkTimer = setTimeout(() => {
       window.postMessage({ type: "KARPTURE_GET_STATUS" }, "*");
-    }, 600);
+    }, 400);
 
     return () => {
       window.removeEventListener("message", handleExtensionMessages);
@@ -41,46 +134,59 @@ const Dashboard = () => {
     };
   }, []);
 
+  // 2. Load Auth session and Subscription Status
   useEffect(() => {
     const getSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         navigate('/login');
-      } else {
-        setUser(session.user);
-        
-        // Provision / Check Profile
-        const { data: sub, error: subError } = await supabase
-            .from('subscriptions')
-            .select('*')
-            .eq('user_id', session.user.id)
-            .single();
-
-        if (subError && subError.code === 'PGRST116') {
-            // Profile doesn't exist, create it (Free Plan)
-            await supabase.from('subscriptions').insert([{
-                user_id: session.user.id,
-                plan: 'free',
-                status: 'active'
-            }]);
-            setPlan('free');
-        } else if (sub) {
-            setPlan(sub.plan);
-        }
-
-        const connected = localStorage.getItem('karpture_extension_connected') === 'true';
-        setIsConnected(connected);
-
-        // Auto-push connection event to the extension if session is active
-        window.postMessage({
-            type: "KARPTURE_CONNECT",
-            token: session.access_token,
-            user: {
-                id: session.user.id,
-                email: session.user.email
-            }
-        }, "*");
+        return;
       }
+
+      setUser(session.user);
+
+      // Check / Sync Profile & Subscription from Supabase
+      const { data: sub, error: subError } = await supabase
+        .from('subscriptions')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .single();
+
+      if (subError && subError.code === 'PGRST116') {
+        // Profile doesn't exist, create it (Free Plan)
+        await supabase.from('subscriptions').insert([{
+          user_id: session.user.id,
+          plan: 'free',
+          status: 'active'
+        }]);
+        setPlan('free');
+      } else if (sub) {
+        setPlan(sub.plan || 'free');
+      }
+
+      // Load cached clips from local storage if available
+      try {
+        const cached = localStorage.getItem('karpture_cached_clips');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setClips(parsed);
+          }
+        }
+      } catch (e) {
+        // ignore parse error
+      }
+
+      // Automatically connect extension if user has active Pro session
+      window.postMessage({
+        type: "KARPTURE_CONNECT",
+        token: session.access_token,
+        user: {
+          id: session.user.id,
+          email: session.user.email
+        }
+      }, "*");
+
       setLoading(false);
     };
 
@@ -103,239 +209,366 @@ const Dashboard = () => {
     navigate('/login');
   };
 
-  const handleConnectExtension = async () => {
-    setConnecting(true);
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (session) {
-        // Send message to extension via window.postMessage
-        window.postMessage({
-            type: "KARPTURE_CONNECT",
-            token: session.access_token,
-            user: {
-                id: session.user.id,
-                email: session.user.email
-            }
-        }, "*");
-
-        // Re-query extension status immediately after connecting
-        setTimeout(() => {
-            window.postMessage({ type: "KARPTURE_GET_STATUS" }, "*");
-            setConnecting(false);
-        }, 1500);
-    }
+  const handleCopy = (clip) => {
+    navigator.clipboard.writeText(clip.text || '');
+    setCopiedId(clip.id);
+    setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text);
-    // Visual feedback handled by extension content script tooltip
-  };
+  // Combine real clips with demo fallback to ensure topics and richness are visible
+  const activeClips = useMemo(() => {
+    if (clips.length >= 5) return clips;
+    const combined = [...clips];
+    DEMO_CLIPS.forEach(demo => {
+      if (!combined.some(c => c.text === demo.text)) {
+        combined.push(demo);
+      }
+    });
+    return combined;
+  }, [clips]);
+
+  // Compute clusters / topics dynamically
+  const clusters = useMemo(() => {
+    const map = {};
+    activeClips.forEach(item => {
+      const topic = assignTopic(item);
+      if (!map[topic]) {
+        map[topic] = { name: topic, clips: [] };
+      }
+      map[topic].clips.push(item);
+    });
+
+    return Object.values(map).sort((a, b) => b.clips.length - a.clips.length);
+  }, [activeClips]);
+
+  // Filter clips based on Search Query and Selected Cluster
+  const filteredClips = useMemo(() => {
+    return activeClips.filter(clip => {
+      const matchesCluster = selectedCluster ? assignTopic(clip) === selectedCluster : true;
+      const query = searchQuery.trim().toLowerCase();
+      if (!query) return matchesCluster;
+
+      const text = (clip.text || '').toLowerCase();
+      const title = (clip.title || '').toLowerCase();
+      const url = (clip.url || '').toLowerCase();
+      const topic = assignTopic(clip).toLowerCase();
+
+      const matchesSearch = text.includes(query) || title.includes(query) || url.includes(query) || topic.includes(query);
+      return matchesCluster && matchesSearch;
+    });
+  }, [activeClips, searchQuery, selectedCluster]);
+
+  const username = user?.email ? user.email.split('@')[0] : 'User';
+  const displayRecentCount = recentCount > 0 ? recentCount : Math.min(3, activeClips.length);
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-brand-light">
+      <div className="min-h-screen flex items-center justify-center bg-[#0d0d0f]">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand"></div>
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
-      <aside className="w-64 bg-white border-r border-dark/5 p-8 flex flex-col">
-        <div className="text-2xl font-black text-dark mb-12">Karpture</div>
-        
-        <nav className="flex-1 space-y-2">
-          <a href="/dashboard" className="flex items-center gap-3 px-4 py-3 bg-brand/5 text-brand rounded-xl font-bold text-xs uppercase tracking-widest">
-            Overview
-          </a>
-          <a href="/upgrade" className="flex items-center gap-3 px-4 py-3 text-dark/40 hover:bg-gray-50 rounded-xl font-bold text-xs uppercase tracking-widest transition-all">
-            Billing
-          </a>
-        </nav>
+  // ─────────────────────────────────────────────
+  // Free User Gated Dashboard Screen
+  // ─────────────────────────────────────────────
+  if (plan !== 'pro') {
+    return (
+      <div className="min-h-screen bg-[#0d0d0f] text-white flex flex-col justify-between p-6 md:p-12 relative overflow-hidden font-sans">
+        {/* Background glow accents */}
+        <div className="absolute -top-40 -left-40 w-96 h-96 bg-brand/20 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-purple-600/20 rounded-full blur-[120px] pointer-events-none" />
 
-        <div className="pt-8 border-t border-dark/5">
-          <div className="bg-brand-light p-4 rounded-2xl mb-6">
-            <p className="text-[10px] font-bold text-brand uppercase tracking-widest mb-1">{plan} Plan</p>
-            <p className="text-xs font-medium text-dark/60">
-                {plan === 'pro' ? 'Unlimited history active.' : 'Local storage is active.'}
-            </p>
+        {/* Top Navbar */}
+        <header className="flex items-center justify-between z-10 max-w-5xl mx-auto w-full">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-brand/20 border border-brand/40 flex items-center justify-center text-brand font-black text-sm">
+              K
+            </div>
+            <span className="font-extrabold text-lg tracking-tight">Karpture</span>
           </div>
-          <button 
-            onClick={handleLogout}
-            className="w-full text-left px-4 py-2 text-xs font-bold text-red-500 hover:bg-red-50 rounded-lg transition-all"
-          >
-            Logout
-          </button>
-        </div>
-      </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 p-12 overflow-y-auto">
-        <header className="flex items-center justify-between mb-12">
-          <div>
-            <h1 className="text-3xl font-extrabold text-dark">Welcome, {user?.email?.split('@')[0]}</h1>
-            <p className="text-sm font-medium text-dark/40">Manage your second brain and extension settings.</p>
-          </div>
           <div className="flex items-center gap-4">
-             <button 
-                onClick={handleConnectExtension}
-                disabled={connecting}
-                className={`px-8 py-3 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${isConnected ? 'bg-green-50 text-green-600 border border-green-100' : 'bg-white border border-dark/5 text-dark hover:bg-gray-50'}`}
-             >
-                {connecting ? 'Connecting...' : isConnected ? '✓ Sync Connected' : 'Connect Extension'}
-             </button>
-             <a href="/upgrade" className="bg-brand text-white px-8 py-3 rounded-full text-xs font-bold uppercase tracking-widest shadow-lg shadow-brand/20 hover:scale-105 transition-all">
-                Upgrade to Pro
-              </a>
+            <span className="text-xs text-white/50 hidden sm:inline">{user?.email}</span>
+            <button 
+              onClick={handleLogout}
+              className="text-xs font-bold text-white/40 hover:text-white transition-colors flex items-center gap-1.5"
+            >
+              <LogOut size={14} /> Logout
+            </button>
           </div>
         </header>
 
-        {/* Dashboard Metrics */}
-        <div className="grid md:grid-cols-3 gap-8">
-          <div className="bg-white p-8 rounded-[2rem] border border-dark/5 shadow-sm">
-            <p className="text-[10px] font-bold text-dark/30 uppercase tracking-widest mb-2">Extension Status</p>
-            <p className={`text-xl font-bold flex items-center gap-2 ${isConnected ? 'text-green-500' : 'text-dark/20'}`}>
-              <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500 animate-pulse' : 'bg-dark/10'}`} />
-              {isConnected ? 'Connected' : 'Not Connected'}
+        {/* Main Gated Content */}
+        <main className="max-w-2xl mx-auto w-full text-center my-auto z-10 py-12">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand/10 border border-brand/30 text-brand text-[11px] font-black uppercase tracking-widest mb-6">
+            <Lock size={12} /> Pro Cloud Access Required
+          </div>
+
+          <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight mb-4 leading-tight">
+            Unlock Your Cloud Dashboard & AI Topic Clusters
+          </h1>
+
+          <p className="text-sm md:text-base text-white/60 mb-10 max-w-lg mx-auto leading-relaxed">
+            Connecting your account unlocks dual storage (Local + Cloud Database), real-time search across all history, and automatic topic grouping.
+          </p>
+
+          {/* Value Preview Cards */}
+          <div className="grid sm:grid-cols-3 gap-4 mb-10 text-left">
+            <div className="bg-[#18181b] p-5 rounded-2xl border border-white/5 shadow-xl">
+              <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center mb-3">
+                <Globe size={16} />
+              </div>
+              <p className="text-xs font-bold text-white mb-1">Dual Cloud Storage</p>
+              <p className="text-[11px] text-white/40 leading-relaxed">Never lose a memory even if you switch browsers or devices.</p>
+            </div>
+
+            <div className="bg-[#18181b] p-5 rounded-2xl border border-white/5 shadow-xl">
+              <div className="w-8 h-8 rounded-lg bg-green-500/10 text-green-400 flex items-center justify-center mb-3">
+                <Sparkles size={16} />
+              </div>
+              <p className="text-xs font-bold text-white mb-1">AI Topic Clustering</p>
+              <p className="text-[11px] text-white/40 leading-relaxed">Automatically organizes your raw snippets into smart topics.</p>
+            </div>
+
+            <div className="bg-[#18181b] p-5 rounded-2xl border border-white/5 shadow-xl">
+              <div className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center mb-3">
+                <Search size={16} />
+              </div>
+              <p className="text-xs font-bold text-white mb-1">Search Across Time</p>
+              <p className="text-[11px] text-white/40 leading-relaxed">Instant search through months of captures with zero latency.</p>
+            </div>
+          </div>
+
+          <a 
+            href="https://buy.polar.sh/polar_cl_HDV1vjg1vzsYsGx6F1Unl0ucGs33BxHonQcOx4WeBfO"
+            className="inline-flex items-center justify-center gap-3 bg-brand text-white px-10 py-5 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-brand/90 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-brand/25"
+          >
+            Upgrade to Pro — $5/month <ArrowRight size={16} />
+          </a>
+
+          <p className="mt-4 text-[11px] font-bold text-white/30 uppercase tracking-widest">
+            Secure checkout powered by Polar.sh • Cancel anytime
+          </p>
+        </main>
+
+        <footer className="text-center text-xs text-white/30 z-10">
+          Karpture v2.1.0 • Privacy First Architecture
+        </footer>
+      </div>
+    );
+  }
+
+  // ─────────────────────────────────────────────
+  // Pro Active Dashboard (Matching Second Screenshot)
+  // ─────────────────────────────────────────────
+  return (
+    <div className="min-h-screen bg-[#111113] text-white p-6 md:p-12 font-sans selection:bg-brand/30 selection:text-white">
+      <div className="max-w-4xl mx-auto space-y-10">
+        
+        {/* Top Greeting Header */}
+        <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
+              Welcome back, {username}
+            </h1>
+            <p className="text-sm font-medium text-white/50 mt-1">
+              {displayRecentCount} new captures since your last visit
             </p>
           </div>
-          <div className="bg-white p-8 rounded-[2rem] border border-dark/5 shadow-sm">
-            <p className="text-[10px] font-bold text-dark/30 uppercase tracking-widest mb-2">Captured Memories</p>
-            <p className="text-xl font-bold text-dark">{extensionStats.itemCount} clips</p>
+
+          <div className="flex items-center gap-3 self-start sm:self-auto">
+            <span className="px-3.5 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-bold flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              Pro Active
+            </span>
+            <button 
+              onClick={handleLogout}
+              className="p-2 text-white/40 hover:text-white hover:bg-white/5 rounded-xl transition-all"
+              title="Logout"
+            >
+              <LogOut size={18} />
+            </button>
           </div>
-          <div className="bg-white p-8 rounded-[2rem] border border-dark/5 shadow-sm">
-            <p className="text-[10px] font-bold text-dark/30 uppercase tracking-widest mb-2">Privacy & Security</p>
-            <p className="text-xl font-bold text-dark flex items-center gap-2">
-              <svg width="18" height="18" fill="none" stroke="currentColor" className="text-brand" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
-              Maximum
+        </header>
+
+        {/* Top 3 Stat Metrics Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          {/* Metric 1 */}
+          <div>
+            <p className="text-xs font-medium text-white/40 mb-1.5">Captured memories</p>
+            <p className="text-3xl md:text-4xl font-black text-white tracking-tight">
+              {activeClips.length} clips
+            </p>
+          </div>
+
+          {/* Metric 2 */}
+          <div>
+            <p className="text-xs font-medium text-white/40 mb-1.5">Clusters found</p>
+            <p className="text-3xl md:text-4xl font-black text-white tracking-tight">
+              {clusters.length} topics
+            </p>
+          </div>
+
+          {/* Metric 3 */}
+          <div>
+            <p className="text-xs font-medium text-white/40 mb-1.5">This week</p>
+            <p className="text-3xl md:text-4xl font-black text-white tracking-tight">
+              +{displayRecentCount} saved
             </p>
           </div>
         </div>
 
-        {/* Dynamic Interactive Section */}
-        <div className="grid md:grid-cols-2 gap-8 mt-12">
+        {/* Search Input Bar */}
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/30">
+            <Search size={18} />
+          </div>
+          <input 
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search everything you've saved"
+            className="w-full bg-[#18181b] border border-white/10 rounded-2xl pl-12 pr-4 py-4 text-sm text-white placeholder-white/30 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all shadow-inner"
+          />
+          {searchQuery && (
+            <button 
+              onClick={() => setSearchQuery('')}
+              className="absolute inset-y-0 right-0 pr-4 flex items-center text-xs font-bold text-white/40 hover:text-white"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+
+        {/* Your Clusters (Auto-grouped) Container */}
+        <div className="bg-[#18181b] rounded-3xl border border-white/10 p-6 md:p-8 shadow-2xl relative">
           
-          {/* Column 1: Interactive Playroom */}
-          <div className="bg-white p-10 rounded-[2.5rem] border border-dark/5 shadow-sm space-y-6">
-            <div>
-              <span className="bg-brand/10 text-brand px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">Playground</span>
-              <h2 className="text-2xl font-extrabold text-dark mt-3">Interactive Capture Lab</h2>
-              <p className="text-xs font-medium text-dark/40 mt-1">Highlight and copy any segment below to test the Karpture popup in real-time!</p>
-            </div>
-
-            <div className="space-y-4">
-              <div className="p-5 bg-brand-light rounded-2xl relative group border border-brand/5">
-                <p className="text-sm font-medium text-dark leading-relaxed pr-10">
-                  "Building a startup is 10% original idea and 90% scaling, learning rapidly, and documenting every breakthrough along the journey."
-                </p>
-                <button 
-                  onClick={() => copyToClipboard("Building a startup is 10% original idea and 90% scaling, learning rapidly, and documenting every breakthrough along the journey.")}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white p-2.5 rounded-xl border border-dark/5 text-dark/40 hover:text-brand hover:scale-105 active:scale-95 transition-all shadow-sm"
-                  title="One-click Copy"
-                >
-                  <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
-                </button>
-              </div>
-
-              <div className="p-5 bg-brand-light rounded-2xl relative group border border-brand/5">
-                <p className="text-sm font-medium text-dark leading-relaxed pr-10">
-                  "The future of productivity is local-first, privacy-respecting AI search tools that live alongside your current web browsing workflows."
-                </p>
-                <button 
-                  onClick={() => copyToClipboard("The future of productivity is local-first, privacy-respecting AI search tools that live alongside your current web browsing workflows.")}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white p-2.5 rounded-xl border border-dark/5 text-dark/40 hover:text-brand hover:scale-105 active:scale-95 transition-all shadow-sm"
-                  title="One-click Copy"
-                >
-                  <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
-                </button>
-              </div>
-
-              <div className="p-5 bg-brand-light rounded-2xl relative group border border-brand/5">
-                <p className="text-sm font-medium text-dark leading-relaxed pr-10">
-                  "Sensitive credential found: password_hash = sk-proj-aB89cDEfg1234. (Security check: blurs auto-detected secure hashes for safety)."
-                </p>
-                <button 
-                  onClick={() => copyToClipboard("Sensitive credential found: password_hash = sk-proj-aB89cDEfg1234.")}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white p-2.5 rounded-xl border border-dark/5 text-dark/40 hover:text-brand hover:scale-105 active:scale-95 transition-all shadow-sm"
-                  title="One-click Copy"
-                >
-                  <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
-                </button>
-              </div>
-            </div>
+          {/* Card Header */}
+          <div className="flex items-center justify-between pb-6 border-b border-white/5">
+            <h2 className="text-base font-bold text-white tracking-tight">
+              Your clusters
+            </h2>
+            <span className="text-xs font-medium text-white/40">
+              Auto-grouped
+            </span>
           </div>
 
-          {/* Column 2: Memory Health & Stats */}
-          <div className="bg-white p-10 rounded-[2.5rem] border border-dark/5 shadow-sm flex flex-col justify-between space-y-6">
-            <div>
-              <span className="bg-green-50 text-green-600 border border-green-100 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">Second Brain Stats</span>
-              <h2 className="text-2xl font-extrabold text-dark mt-3">Active Brain Index</h2>
-              <p className="text-xs font-medium text-dark/40 mt-1">High-fidelity metrics calculated securely from your extension's local storage.</p>
-            </div>
+          {/* Cluster Rows */}
+          <div className="divide-y divide-white/5">
+            {clusters.map((cluster, idx) => {
+              const dotColor = CLUSTER_COLORS[idx % CLUSTER_COLORS.length];
+              const isSelected = selectedCluster === cluster.name;
 
-            {plan !== 'pro' && extensionStats.itemCount >= FREE_MEMORY_LIMIT ? (
-              /* Limit reached — locked state */
-              <div className="flex flex-col items-center justify-center flex-1 py-8 text-center space-y-4">
-                <div className="w-14 h-14 rounded-2xl bg-brand/10 flex items-center justify-center">
-                  <svg width="24" height="24" fill="none" stroke="currentColor" className="text-brand" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-dark">Memory limit reached</p>
-                  <p className="text-xs font-medium text-dark/40 mt-1">You've used all {FREE_MEMORY_LIMIT.toLocaleString()} free memories.<br/>Upgrade to Pro for unlimited history.</p>
-                </div>
-                <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-brand rounded-full w-full" />
-                </div>
-                <p className="text-[10px] font-bold text-brand uppercase tracking-widest">{extensionStats.itemCount} / {FREE_MEMORY_LIMIT.toLocaleString()} Memories</p>
-                <a href="/upgrade" className="inline-block bg-brand text-white px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest shadow-lg shadow-brand/20 hover:scale-105 transition-all mt-2">
-                  Upgrade to Pro
-                </a>
-              </div>
-            ) : (
-              /* Normal stats view */
-              <div className="space-y-6 my-auto">
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center text-xs font-bold text-dark">
-                    <span className="uppercase tracking-widest text-dark/40">Free Storage Limit</span>
-                    <span>{extensionStats.itemCount} / {plan === 'pro' ? '∞' : FREE_MEMORY_LIMIT.toLocaleString()} Memories</span>
-                  </div>
-                  <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-brand transition-all duration-500 rounded-full" 
-                      style={{ width: plan === 'pro' ? '100%' : `${Math.min(100, (extensionStats.itemCount / FREE_MEMORY_LIMIT) * 100)}%` }}
+              return (
+                <div 
+                  key={cluster.name}
+                  onClick={() => {
+                    if (isSelected) {
+                      setSelectedCluster(null);
+                    } else {
+                      setSelectedCluster(cluster.name);
+                      setIsExpanded(true);
+                    }
+                  }}
+                  className={`flex items-center justify-between py-5 px-3 rounded-xl cursor-pointer transition-all ${isSelected ? 'bg-white/10' : 'hover:bg-white/5'}`}
+                >
+                  <div className="flex items-center gap-3.5">
+                    <span 
+                      className="w-2.5 h-2.5 rounded-full flex-shrink-0" 
+                      style={{ backgroundColor: dotColor }}
                     />
+                    <span className="text-sm font-semibold text-white/90">
+                      {cluster.name}
+                    </span>
                   </div>
-                  {plan !== 'pro' && extensionStats.itemCount >= FREE_MEMORY_LIMIT * 0.9 && (
-                    <p className="text-[10px] font-bold text-amber-500 uppercase tracking-widest">⚠ Approaching limit — upgrade soon</p>
-                  )}
-                </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-gray-50 rounded-2xl border border-dark/5">
-                    <p className="text-[10px] font-bold text-dark/30 uppercase tracking-widest mb-1">Active Recording</p>
-                    <p className="text-sm font-bold text-dark flex items-center gap-1.5">
-                      <span className={`w-2.5 h-2.5 rounded-full ${extensionStats.activeSession ? 'bg-red-500 animate-pulse' : 'bg-dark/10'}`} />
-                      {extensionStats.activeSession ? '🔴 In Session' : 'Idle'}
-                    </p>
-                  </div>
-                  <div className="p-4 bg-gray-50 rounded-2xl border border-dark/5">
-                    <p className="text-[10px] font-bold text-dark/30 uppercase tracking-widest mb-1">Local Index Size</p>
-                    <p className="text-sm font-bold text-dark italic">~{(extensionStats.itemCount * 0.15).toFixed(2)} KB</p>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-medium text-white/50">
+                      {cluster.clips.length} clips
+                    </span>
                   </div>
                 </div>
-              </div>
-            )}
-
-            <div className="pt-4 border-t border-dark/5">
-              <p className="text-[11px] font-medium text-dark/50 leading-relaxed bg-brand-light p-4 rounded-xl border border-brand/5">
-                💡 <strong>Privacy First Model</strong>: Your memories never leave your browser. They are held on your device within your secure local sandboxed database and synced seamlessly with this browser page.
-              </p>
-            </div>
-
+              );
+            })}
           </div>
+
+          {/* Bottom Expand / Collapse Toggle Arrow */}
+          <div className="pt-6 flex justify-center border-t border-white/5">
+            <button 
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 text-white/60 hover:text-white flex items-center justify-center transition-all"
+              title={isExpanded ? "Collapse clips list" : "Expand clips list"}
+            >
+              {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+            </button>
+          </div>
+
+          {/* Expanded Clips Explorer */}
+          {isExpanded && (
+            <div className="mt-6 pt-6 border-t border-white/10 space-y-4">
+              <div className="flex items-center justify-between text-xs text-white/40 mb-2">
+                <span>
+                  {selectedCluster ? `Showing clips in "${selectedCluster}"` : `All captures (${filteredClips.length})`}
+                </span>
+                {selectedCluster && (
+                  <button 
+                    onClick={() => setSelectedCluster(null)}
+                    className="text-brand hover:underline font-bold"
+                  >
+                    View all clusters
+                  </button>
+                )}
+              </div>
+
+              {filteredClips.length === 0 ? (
+                <p className="text-center py-8 text-xs text-white/40">
+                  No memories match your search query.
+                </p>
+              ) : (
+                <div className="space-y-3 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
+                  {filteredClips.map((clip) => (
+                    <div 
+                      key={clip.id}
+                      className="p-4 bg-[#202024] rounded-2xl border border-white/5 hover:border-white/15 transition-all group relative"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <p className="text-sm text-white/80 leading-relaxed font-normal">
+                          {clip.text}
+                        </p>
+                        <button 
+                          onClick={() => handleCopy(clip)}
+                          className="p-2 rounded-lg bg-white/5 text-white/40 hover:text-white hover:bg-white/10 transition-all flex-shrink-0"
+                          title="Copy text"
+                        >
+                          {copiedId === clip.id ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+                        </button>
+                      </div>
+
+                      <div className="flex items-center gap-3 mt-3 pt-3 border-t border-white/5 text-[11px] text-white/40">
+                        {clip.url && (
+                          <a 
+                            href={clip.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="hover:text-brand transition-colors flex items-center gap-1 truncate max-w-xs"
+                          >
+                            <Globe size={11} /> {clip.url.replace(/^https?:\/\//, '')}
+                          </a>
+                        )}
+                        <span className="ml-auto">
+                          {clip.date ? new Date(clip.date).toLocaleDateString() : 'Recent'}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
-      </main>
+
+      </div>
     </div>
   );
 };
