@@ -27,7 +27,7 @@ export const FEATURES_CONTENT = {
   features: [
     {
       title: "Unlimited Memory",
-      description: "Pro users never lose a thing. Free users enjoy a 30-day rolling window.",
+      description: "Pro users never lose a thing. Free users enjoy a 90-day rolling window.",
       icon: "Brain",
     },
     {
@@ -67,7 +67,7 @@ export const PRICING_CONTENT = {
       price: "0",
       description: "Perfect for casual users who need a short-term memory boost.",
       features: [
-        "30-day memory history",
+        "90-day memory history",
         "Basic search functionality",
         "Core capture engine",
         "Pin favorite snippets",

@@ -119,7 +119,7 @@ function Home() {
             {[
               {
                 title: "🧠 Unlimited Memory",
-                desc: "Pro users never lose anything. Free users get 30 days — upgrade to keep everything forever.",
+                desc: "Pro users never lose anything. Free users get 90 days — upgrade to keep everything forever.",
                 icon: (
                   <svg className="w-8 h-8 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <path d="M12 2v10M18 6l-6 6-6-6" />
@@ -322,7 +322,7 @@ function Home() {
                 <div className="text-4xl font-bold">$0<span className="text-lg font-normal text-slate-400">/forever</span></div>
               </div>
               <ul className="space-y-6 mb-12">
-                {["30 days memory history", "Basic search", "Core capture", "Pin favourites"].map((feature, i) => (
+                {["90 days memory history", "Basic search", "Core capture", "Pin favourites"].map((feature, i) => (
                   <li key={i} className="flex items-center space-x-4 text-slate-600">
                     <svg className="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
                     <span>{feature}</span>

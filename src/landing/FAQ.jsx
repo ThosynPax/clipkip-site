@@ -13,7 +13,7 @@ const FAQ_DATA = [
   },
   {
     question: "Is there a limit on how much I can save?",
-    answer: "Free users have a 30-day rolling memory. Pro users have unlimited history forever."
+    answer: "Free users have a 90-day rolling memory. Pro users have unlimited history forever."
   },
   {
     question: "Can I export my data?",

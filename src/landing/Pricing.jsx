@@ -27,7 +27,7 @@ export const Pricing = () => {
                       {plan.price}
                     </p>
                     <span className="text-[10px] font-bold text-dark/40 ml-1 uppercase tracking-widest">
-                      {plan.name === 'Pro Access' ? '/year' : 'once'}
+                      {plan.name === 'Pro Access' ? '/month' : 'once'}
                     </span>
                   </div>
                   <h3 className="text-xl font-extrabold text-dark tracking-tight">{plan.name}</h3>
