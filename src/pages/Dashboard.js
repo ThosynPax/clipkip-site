@@ -362,7 +362,7 @@ const Dashboard = () => {
         </main>
 
         <footer className="text-center text-xs text-white/30 z-10">
-          Karpture v2.1.0 • Privacy First Architecture
+          Karpture • Privacy First Architecture
         </footer>
       </div>
     );
