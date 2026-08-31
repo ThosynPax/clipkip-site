@@ -188,6 +188,12 @@ const Dashboard = () => {
         }
       }, "*");
 
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', 'dashboard_viewed', {
+          plan: sub?.plan || 'free'
+        });
+      }
+
       setLoading(false);
     };
 
@@ -340,6 +346,11 @@ const Dashboard = () => {
 
           <a 
             href="https://buy.polar.sh/polar_cl_HDV1vjg1vzsYsGx6F1Unl0ucGs33BxHonQcOx4WeBfO"
+            onClick={() => {
+              if (typeof window.gtag === 'function') {
+                window.gtag('event', 'upgrade_clicked', { source: 'dashboard_gated_cta' });
+              }
+            }}
             className="inline-flex items-center justify-center gap-3 bg-brand text-white px-10 py-5 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-brand/90 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-brand/25"
           >
             Upgrade to Pro — $5/month <ArrowRight size={16} />
@@ -475,6 +486,9 @@ const Dashboard = () => {
                     } else {
                       setSelectedCluster(cluster.name);
                       setIsExpanded(true);
+                      if (typeof window.gtag === 'function') {
+                        window.gtag('event', 'cluster_clicked', { cluster_name: cluster.name });
+                      }
                     }
                   }}
                   className={`flex items-center justify-between py-5 px-3 rounded-xl cursor-pointer transition-all ${isSelected ? 'bg-white/10' : 'hover:bg-white/5'}`}
