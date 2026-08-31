@@ -1,7 +1,8 @@
-import { Globe, ArrowRight, FileText, Headphones, Video } from 'lucide-react';
+import { ArrowRight, FileText, Headphones, Video } from 'lucide-react';
 import { CTA_CONTENT } from './constants';
 import { Section, FadeIn } from './Section';
 import { Link } from 'react-router-dom';
+import { ChromeIcon, FirefoxIcon, EdgeIcon, OperaIcon } from './BrowserLogos';
 
 export const DownloadCTA = () => {
   return (
@@ -19,14 +20,33 @@ export const DownloadCTA = () => {
               {CTA_CONTENT.description}
             </p>
             
-            <div className="flex flex-wrap justify-center gap-4 pt-4">
-              <a href={CTA_CONTENT.ctaUrl} className="flex items-center gap-3 bg-white text-dark px-6 py-4 md:px-10 md:py-5 rounded-2xl hover:bg-gray-50 transition-all shadow-xl active:scale-95 group/btn">
-                <Globe size={24} className="text-brand md:w-7 md:h-7" />
+            <div className="flex flex-col items-center gap-6 pt-4">
+              <a href={CTA_CONTENT.ctaUrl} className="flex items-center gap-3 bg-white text-dark px-8 py-4 md:px-10 md:py-5 rounded-2xl hover:bg-gray-50 transition-all shadow-xl active:scale-95 group/btn">
+                <ChromeIcon className="w-6 h-6" />
                 <div className="text-left">
                   <div className="text-[9px] md:text-[10px] opacity-60 leading-none font-bold uppercase tracking-widest">Available on</div>
                   <div className="text-base md:text-lg font-bold leading-none mt-1">Chrome Web Store</div>
                 </div>
               </a>
+
+              {/* Supported Browsers Pill Strip in CTA */}
+              <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                <span className="text-[11px] font-bold text-white/70 uppercase tracking-wider mr-1">
+                  Works Everywhere:
+                </span>
+                <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-white text-xs font-semibold">
+                  <ChromeIcon className="w-3.5 h-3.5" /> Chrome
+                </div>
+                <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-white text-xs font-semibold">
+                  <FirefoxIcon className="w-3.5 h-3.5" /> Firefox
+                </div>
+                <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-white text-xs font-semibold">
+                  <EdgeIcon className="w-3.5 h-3.5" /> Edge
+                </div>
+                <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-white text-xs font-semibold">
+                  <OperaIcon className="w-3.5 h-3.5" /> Opera
+                </div>
+              </div>
             </div>
           </div>
         </div>

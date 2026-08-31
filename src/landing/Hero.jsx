@@ -1,6 +1,7 @@
 import { Globe, ArrowRight, Sparkles } from 'lucide-react';
 import { HERO_CONTENT } from './constants';
 import { Section, FadeIn } from './Section';
+import { SupportedBrowsers } from './BrowserLogos';
 
 export const Hero = () => {
   return (
@@ -56,12 +57,14 @@ export const Hero = () => {
             <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
           </a>
 
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-6 pt-4">
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-6 pt-2">
             <div className="flex items-center gap-2 text-dark/30">
               <span className="flex text-yellow-400">★★★★★</span>
               <span className="text-[10px] font-bold uppercase tracking-wider text-dark/40">5.0 on Web Store</span>
             </div>
           </div>
+
+          <SupportedBrowsers className="pt-3" />
         </FadeIn>
 
         {/* Hero Browser Mockup */}
